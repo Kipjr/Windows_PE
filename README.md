@@ -3,6 +3,10 @@ Automatic build &amp; customization of WinPE
 
 ## Basic
 
+<details>
+  <summary>Full Windows UEFI Boot schematic of Windows PE</summary>
+
+
 ```mermaid
 flowchart TB
     WR[Winlogon.exe reads HKLM\System\Setup\CmdLine:<br> winpeshl.exe]
@@ -102,6 +106,8 @@ end
 
 
 ```
+
+</details>
 
 ## Customization
 - Mount <br>`Dism /Mount-Image /ImageFile:"C:\WinPE_amd64\media\sources\boot.wim" /index:1 /MountDir:"C:\WinPE_amd64\mount"`
