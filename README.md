@@ -1,3 +1,4 @@
+[![Build & Publish](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml)
 # Windows_PE
 Automatic build &amp; customization of WinPE
 
@@ -128,32 +129,32 @@ UX -...- |ERROR| cmd
 - WinPE-PowerShell
 - WinPE-DismCmdlets
 - WinPE-SecureBootCmdlets
+- WinPE-StorageWMI
 ### Optional Components
 
-WinPE-DismCmdlets
-WinPE-Dot3Svc
-WinPE-EnhancedStorage
-WinPE-FMAPI
-WinPE-Fonts-Legacy
-WinPE-Font Support-JA-JP
-WinPE-Font Support-KO-KR
-WinPE-Font Support-ZH-CN
-WinPE-Font Support-ZH-HK
-WinPE-GamingPeripherals
-Winpe-LegacySetup
-WinPE-MDAC
-WinPE-PlatformID
-WinPE-PPPoE
-WinPE-Rejuv
-WinPE-RNDIS
-WinPE-Setup
-WinPE-Setup-Client
-WinPE-Setup-Server
-WinPE-SRT
-WinPE-StorageWMI
-WinPE-WDS-Tools
-WinPE-WiFi-Package
-WinPE-WinReCfg
+- WinPE-DismCmdlets
+- WinPE-Dot3Svc
+- WinPE-EnhancedStorage
+- WinPE-FMAPI
+- WinPE-Fonts-Legacy
+- WinPE-Font Support-JA-JP
+- WinPE-Font Support-KO-KR
+- WinPE-Font Support-ZH-CN
+- WinPE-Font Support-ZH-HK
+- WinPE-GamingPeripherals
+- Winpe-LegacySetup
+- WinPE-MDAC
+- WinPE-PlatformID
+- WinPE-PPPoE
+- WinPE-Rejuv
+- WinPE-RNDIS
+- WinPE-Setup
+- WinPE-Setup-Client
+- WinPE-Setup-Server
+- WinPE-SRT
+- WinPE-WDS-Tools
+- WinPE-WiFi-Package
+- WinPE-WinReCfg
 ## Documentation
 
 [WinPE Optional Components](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-add-packages--optional-components-reference?view=windows-11)
