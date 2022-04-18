@@ -3,8 +3,7 @@ Automatic build &amp; customization of WinPE
 
 ## Basic
 
-<details>
-  <summary>Full Windows UEFI Boot schematic of Windows PE</summary>
+Full Windows UEFI Boot schematic of Windows PE
 
 
 ```mermaid
@@ -100,14 +99,10 @@ end
     RT --> ET
 
 end
-
-
-    UX -...- |ERROR| cmd
-
+UX -...- |ERROR| cmd
 
 ```
 
-</details>
 
 ## Customization
 - Mount <br>`Dism /Mount-Image /ImageFile:"C:\WinPE_amd64\media\sources\boot.wim" /index:1 /MountDir:"C:\WinPE_amd64\mount"`
