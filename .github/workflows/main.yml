@@ -36,19 +36,19 @@ jobs:
           }
       - name: Install ADK
         shell: pwsh
-        run: $env:ALLUSERSPROFILE\chocolatey\bin\choco.exe install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
+        run: choco install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
 
       - name: Install ADK-WinPE
         shell: pwsh
-        run: $env:ALLUSERSPROFILE\chocolatey\bin\choco.exe install windows-adk-winpe -y # https://go.microsoft.com/fwlink/?linkid=2166133
+        run: choco install windows-adk-winpe -y # https://go.microsoft.com/fwlink/?linkid=2166133
     
   build:
     needs: setup
     runs-on: windows-latest
     steps:
       - name: Build the WinPE image
-        run: .\New-WinPEImage.ps1
         shell: pwsh
+        run: .\New-WinPEImage.ps1
 
 
   publish:
