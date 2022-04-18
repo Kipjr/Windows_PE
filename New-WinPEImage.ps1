@@ -50,5 +50,5 @@ try {
     "Start the Deployment and Imaging Tools Environment & Create ISO file" | write-host -foregroundcolor magenta
     & cmd /c `"$DeployImagingToolsENV`" && `"$WinPEPATH\makeWinPEMedia.cmd`" /ISO .\WinPE_amd64 .\WinPE_amd64.iso
 } catch {
-    get-content -path "C:\Windows\Logs\DISM\dism.log"
+    get-content -path "C:\Windows\Logs\DISM\dism.log" | Where-Object {$_ -like "$(get-date -f 'yyyy-MM-dd')*"} | Select-Object -Last 250
 }
