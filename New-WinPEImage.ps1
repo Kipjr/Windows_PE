@@ -31,7 +31,7 @@ function DismAddPackage {
 
 
 #Start the Deployment and Imaging Tools Environment as an administrator.
-copype amd64 .\WinPE_amd64
+& "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Windows Preinstallation Environment\copype.cmd" amd64 .\WinPE_amd64
 
 "Mounting image" | write-host -foregroundcolor magenta
 & "$env:systemroot\System32\Dism.exe" /Mount-Image /ImageFile:".\WinPE_amd64\media\sources\boot.wim" /index:1 /MountDir:".\WinPE_amd64\mount"
@@ -46,4 +46,4 @@ foreach($c in $json.WinPEOptionalComponents){
 & "$env:systemroot\System32\Dism.exe" /Unmount-Image /MountDir:".\WinPE_amd64\mount" /commit
 
 "Create ISO file" | write-host -foregroundcolor magenta
-MakeWinPEMedia /ISO ".\WinPE_amd64" ".\WinPE_amd64.iso"
+& "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Windows Preinstallation Environment\makeWinPEMedia.cmd" /ISO ".\WinPE_amd64" ".\WinPE_amd64.iso"
