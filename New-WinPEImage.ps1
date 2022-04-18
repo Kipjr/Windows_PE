@@ -31,7 +31,7 @@ function DismAddPackage {
     & $command2
 }
 
-try {
+#try {
     "Start the Deployment and Imaging Tools Environment & create winpe for amd64" | write-host -foregroundcolor magenta
     cmd /k """$DeployImagingToolsENV"" && copype.cmd amd64 %GITHUB_WORKSPACE%\WinPE_amd64 && exit"
     
@@ -50,6 +50,6 @@ try {
 
     "Start the Deployment and Imaging Tools Environment & Create ISO file" | write-host -foregroundcolor magenta
     cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO %GITHUB_WORKSPACE%\WinPE_amd64 %GITHUB_WORKSPACE%\WinPE_amd64.iso && exit"
-} catch {
-    get-content -path "C:\Windows\Logs\DISM\dism.log" | Where-Object {$_ -like "$(get-date -f 'yyyy-MM-dd')*"} | Select-Object -Last 250
-}
+#} catch {
+ #   get-content -path "C:\Windows\Logs\DISM\dism.log" | Where-Object {$_ -like "$(get-date -f 'yyyy-MM-dd')*"} | Select-Object -Last 250
+#}
