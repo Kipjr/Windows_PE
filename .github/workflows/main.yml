@@ -14,8 +14,7 @@ on:
     types: [created]
 
   # Allows you to run this workflow manually from the Actions tab
-    workflow_dispatch:
-
+  workflow_dispatch:
 
 env: 
   WORKING-DIRECTORY: ./work
@@ -38,7 +37,7 @@ jobs:
 
   build:
     needs: setup
-    runs-on:  windows-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2  
