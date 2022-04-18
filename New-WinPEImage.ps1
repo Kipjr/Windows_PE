@@ -49,7 +49,7 @@ try {
     & "$env:systemroot\System32\Dism.exe" /Unmount-Image /MountDir:"$env:GITHUB_WORKSPACE\WinPE_amd64\mount" /commit
 
     "Start the Deployment and Imaging Tools Environment & Create ISO file" | write-host -foregroundcolor magenta
-    cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO %GITHUB_WORKSPACE	%\WinPE_amd64 %GITHUB_WORKSPACE	%\WinPE_amd64.iso && exit"
+    cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO %GITHUB_WORKSPACE%\WinPE_amd64 %GITHUB_WORKSPACE%\WinPE_amd64.iso && exit"
 } catch {
     get-content -path "C:\Windows\Logs\DISM\dism.log" | Where-Object {$_ -like "$(get-date -f 'yyyy-MM-dd')*"} | Select-Object -Last 250
 }
