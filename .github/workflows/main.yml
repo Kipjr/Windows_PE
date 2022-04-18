@@ -28,18 +28,22 @@ jobs:
         uses: actions/checkout@v2  
         
       - name: Install Choco
+        shell: pwsh
         run: |
           if(test-path -path "$env:ALLUSERSPROFILE\chocolatey\choco.exe"){Write-Output "Choco is already installed"} else {
             [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
             Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
           }
       - name: Install ADK
+        shell: pwsh
         run: $env:ALLUSERSPROFILE\chocolatey\bin\choco.exe install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
 
       - name: Install ADK-WinPE
+        shell: pwsh
         run: $env:ALLUSERSPROFILE\chocolatey\bin\choco.exe install windows-adk-winpe -y # https://go.microsoft.com/fwlink/?linkid=2166133
     
   build:
+    needs: setup
     runs-on: windows-latest
     steps:
       - name: Build the WinPE image
@@ -48,6 +52,7 @@ jobs:
 
 
   publish:
+    needs: [setup, build]
     runs-on: windows-latest
     steps: 
       - name: upload artifact
