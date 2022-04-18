@@ -10,26 +10,10 @@ $WinPEOCPath="$WinPEPATH\amd64\WinPE_OCs"
 $dismPATH="$env:systemroot\System32\Dism.exe" 
 $DeployImagingToolsENV="$adkPATH\Deployment Tools\DandISetEnv.bat" #Deployment and Imaging Tools Environment
 
-function DismAddPackage {
-    Param(
-        [string]$image=".\WinPE_amd64\mount",
-        [Parameter(Mandatory=$true)][string]$packageName
-    )
-    try {
-        $packagePath = if(test-path "$WinPEPath\$packageName.cab") { $="$WinPEOCPath\$packageName.cab" } else {$null}
-        $LangpackagePath = if(test-path "$WinPEPath\en-us\$packageName.cab") { "$WinPEOCPath\en-us\$packageName`_en-us.cab" } else {$null}
-    }
-    catch {
-        write-host "Issue with $packageName.cab"| write-host -foregroundcolor red
-        exit 1
-    }
-    
-    $command1="$dismPATH /Mount-Image /ImageFile`:$image /PackagePath:$packagePath"
-    $command2="$dismPATH /Mount-Image /ImageFile`:$image /PackagePath:$LangpackagePath"
 
-    & $command1
-    & $command2
-}
+    
+    
+
 
 #try {
     "Start the Deployment and Imaging Tools Environment & create winpe for amd64" | write-host -foregroundcolor magenta
@@ -42,7 +26,11 @@ function DismAddPackage {
     "Adding Optional Components" | write-host -foregroundcolor magenta
     foreach($c in $json.WinPEOptionalComponents){
         "Adding: $c" | write-host -foregroundcolor cyan
-        DismAddPackage -packageName $c
+        $command1="dism /Mount-Image /ImageFile:$env:GITHUB_WORKSPACE\WinPE_amd64\mount /PackagePath:$WinPEOCPath\$c.cab"
+        $command2="dism /Mount-Image /ImageFile:$env:GITHUB_WORKSPACE\WinPE_amd64\mount /PackagePath:$WinPEOCPath\en-us\$c.cab"
+
+        & "$command1"
+        & "$command2"
     }
 
     "Unmounting image" | write-host -foregroundcolor magenta
