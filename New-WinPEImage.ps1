@@ -29,7 +29,7 @@ function DismAddPackage {
     & $command2
 }
 
-
+try {
 #Start the Deployment and Imaging Tools Environment as an administrator.
 & "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Windows Preinstallation Environment\copype.cmd" amd64 .\WinPE_amd64
 
@@ -47,3 +47,6 @@ foreach($c in $json.WinPEOptionalComponents){
 
 "Create ISO file" | write-host -foregroundcolor magenta
 & "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Windows Preinstallation Environment\makeWinPEMedia.cmd" /ISO ".\WinPE_amd64" ".\WinPE_amd64.iso"
+} catch {
+  get-content -path "C:\Windows\Logs\DISM\dism.log"
+}
