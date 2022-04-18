@@ -1,7 +1,6 @@
 # This workflow will build winpe then publish a package to GitHub Packages when a release is created
 # 
-name: Build & Publish
-
+name: Create WinPE_amd64.iso
 # Controls when the workflow will run
 #on:
   # Triggers the workflow on push or pull request events but only for the master branch
@@ -18,7 +17,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  setup:
+  build:
     runs-on: windows-latest
     steps:
       - name: Install Choco
@@ -31,11 +30,6 @@ jobs:
       - name: Install ADK
         shell: pwsh
         run: choco install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
-
-  build:
-    needs: setup
-    runs-on: windows-latest
-    steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build the WinPE image
