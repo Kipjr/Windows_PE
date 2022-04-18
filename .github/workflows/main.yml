@@ -39,5 +39,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: WinPE_amd64.iso
-          path: .
+          path: $env:GITHUB_WORKSPACE\WinPE_amd64.iso 
           if-no-files-found: error     
