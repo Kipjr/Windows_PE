@@ -23,7 +23,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   setup:
-    runs-on: [ self-hosted, windows-latest ]
+    runs-on: windows-latest
     steps:
       - name: Install Choco
         shell: pwsh
@@ -38,7 +38,7 @@ jobs:
 
   build:
     needs: setup
-    runs-on: [ self-hosted, windows-latest ]
+    runs-on:  windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2  
