@@ -15,11 +15,7 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
     workflow_dispatch:
-      inputs:
-        servertype:
-            description: 'Server Type (self-hosted/windows-latest):'
-            required: true
-            default: 'windows-latest'
+
 
 env: 
   WORKING-DIRECTORY: ./work
@@ -27,7 +23,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   setup:
-    runs-on: ${{ github.event.inputs.servertype }}
+    runs-on: [ self-hosted, windows-latest ]
     steps:
       - name: Install Choco
         shell: pwsh
@@ -42,7 +38,7 @@ jobs:
 
   build:
     needs: setup
-    runs-on: ${{ github.event.inputs.servertype }}
+    runs-on: [ self-hosted, windows-latest ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2  
