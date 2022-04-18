@@ -1,0 +1,58 @@
+# This workflow will build winpe then publish a package to GitHub Packages when a release is created
+# 
+name: Build & Publish
+
+# Controls when the workflow will run
+#on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  # push:
+  #   branches: [ master ]
+  # pull_request:
+  #  branches: [ master ]
+on:
+  release:
+    types: [created]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env: 
+  WORKING-DIRECTORY: ./work
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  setup:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2  
+        
+      - name: Install Choco
+        run: |
+          if(test-path -path "$env:ALLUSERSPROFILE\chocolatey\choco.exe"){Write-Output "Choco is already installed"} else {
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+            Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          }
+      - name: Install ADK
+        run: $env:ALLUSERSPROFILE\chocolatey\bin\choco.exe install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
+
+      - name: Install ADK-WinPE
+        run: $env:ALLUSERSPROFILE\chocolatey\bin\choco.exe install windows-adk-winpe -y # https://go.microsoft.com/fwlink/?linkid=2166133
+    
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Build the WinPE image
+        run: .\New-WinPEImage.ps1
+        shell: pwsh
+
+
+  publish:
+    runs-on: windows-latest
+    steps: 
+      - name: upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: WinPE_amd64.iso
+          path: ${env:WORKING-DIRECTORY}
+          if-no-files-found: error      
