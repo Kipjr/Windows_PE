@@ -18,15 +18,13 @@ on:
 
 env: 
   WORKING-DIRECTORY: ./work
+  RUNNER: "windows-latest" # windows-latest | self-hosted
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   setup:
-    runs-on: windows-latest
+    runs-on: $RUNNER
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2  
-        
       - name: Install Choco
         shell: pwsh
         run: |
@@ -38,26 +36,18 @@ jobs:
         shell: pwsh
         run: choco install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
 
-      - name: Install ADK-WinPE
-        shell: pwsh
-        run: choco install windows-adk-winpe -y # https://go.microsoft.com/fwlink/?linkid=2166133
-    
   build:
     needs: setup
-    runs-on: windows-latest
+    runs-on: $RUNNER
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2  
       - name: Build the WinPE image
         shell: pwsh
         run: .\New-WinPEImage.ps1
-
-
-  publish:
-    needs: [setup, build]
-    runs-on: windows-latest
-    steps: 
       - name: upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: WinPE_amd64.iso
           path: ${env:WORKING-DIRECTORY}
-          if-no-files-found: error      
+          if-no-files-found: error     
