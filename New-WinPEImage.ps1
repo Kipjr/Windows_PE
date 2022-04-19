@@ -28,7 +28,7 @@ $DeployImagingToolsENV="$adkPATH\Deployment Tools\DandISetEnv.bat" #Deployment a
     foreach($c in $json.WinPEOptionalComponents){
         "Adding: $c" | write-host -foregroundcolor cyan
         Add-WindowsPackage -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -PackagePath "$WinPEOCPath\$c.cab" -PreventPending
-        Add-WindowsPackage -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -PackagePath "$WinPEOCPath\en-us\$c.cab" -PreventPending
+        Add-WindowsPackage -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -PackagePath "$WinPEOCPath\en-us\$c`_en-us.cab" -PreventPending
         
     }
 
