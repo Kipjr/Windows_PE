@@ -92,8 +92,8 @@ foreach($b in $json.bootdrivers){
     Generating hash of contents
  #>
  
-"Generating hash of contents boot.wim " | write-host -foregroundcolor magenta
- get-childitem "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -Recurse -File | select @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist_boot.wim.csv -Delimiter ";"
+# "Generating hash of contents boot.wim " | write-host -foregroundcolor magenta #issue with access denied
+ #get-childitem "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -Recurse -File | select @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist_boot.wim.csv -Delimiter ";"
 
 <# 
     Umounting & create iso
