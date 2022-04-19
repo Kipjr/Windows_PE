@@ -26,8 +26,8 @@ $DeployImagingToolsENV="$adkPATH\Deployment Tools\DandISetEnv.bat" #Deployment a
     "Adding Optional Components" | write-host -foregroundcolor magenta
     foreach($c in $json.WinPEOptionalComponents){
         "Adding: $c" | write-host -foregroundcolor cyan
-        $command1="dism /Mount-Image /ImageFile:$env:GITHUB_WORKSPACE\WinPE_amd64\mount /PackagePath:$WinPEOCPath\$c.cab"
-        $command2="dism /Mount-Image /ImageFile:$env:GITHUB_WORKSPACE\WinPE_amd64\mount /PackagePath:$WinPEOCPath\en-us\$c.cab"
+        $command1="$env:systemroot\System32\Dism.exe /Mount-Image /ImageFile:$env:GITHUB_WORKSPACE\WinPE_amd64\mount /PackagePath:$WinPEOCPath\$c.cab"
+        $command2="$env:systemroot\System32\Dism.exe /Mount-Image /ImageFile:$env:GITHUB_WORKSPACE\WinPE_amd64\mount /PackagePath:$WinPEOCPath\en-us\$c.cab"
 
         & "$command1"
         & "$command2"
