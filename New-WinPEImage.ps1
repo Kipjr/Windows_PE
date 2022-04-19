@@ -54,10 +54,10 @@ if(test-path -path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount\windows\system32\win
 copy-item ./winpeshl.ini "$env:GITHUB_WORKSPACE\WinPE_amd64\mount\windows\system32\winpeshl.ini"
 
 <# 
-    Add files & folders
+    Add files & folders to WinPE
  #>
  
-"Adding Files & Folders" | write-host -ForegroundColor magenta
+"Adding Files & Folders to WinPE" | write-host -ForegroundColor magenta
 $oldloc=get-location 
 set-location .\source\_winpe
 $folders = get-childitem -directory -Path "." -Recurse |  where {$_.FullName -notlike "*.ignore*"}  | Resolve-Path -Relative
@@ -102,7 +102,16 @@ foreach($b in $json.bootdrivers){
 "Unmounting boot.wim image" | write-host -foregroundcolor magenta
 Dismount-WindowsImage -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -Save
 
-"Start the Deployment and Imaging Tools Environment & Create ISO file from mount folder" | write-host -foregroundcolor magenta
+
+"Adding Contents of source\_iso to ISO" | write-host -ForegroundColor magenta
+copy-item -Path ".\source\_iso" -destination "$env:GITHUB_WORKSPACE\WinPE_amd64" -recurse -verbose
+
+
+<# 
+    Add Drivers
+ #>
+
+"Start the Deployment and Imaging Tools Environment & Create ISO file from WinPE_amd64 folder" | write-host -foregroundcolor magenta
 cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO %GITHUB_WORKSPACE%\WinPE_amd64 %GITHUB_WORKSPACE%\WinPE_amd64.iso && exit"
 
 # get-content -path "C:\Windows\Logs\DISM\dism.log" | Where-Object {$_ -like "$(get-date -f 'yyyy-MM-dd')*"} | Select-Object -Last 250
