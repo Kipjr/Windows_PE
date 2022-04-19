@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if:  ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
-          name: WinPE_amd64.iso
+          name: WinPE_amd64
           path: |
             .\WinPE_amd64.iso
             .\filelist.csv
