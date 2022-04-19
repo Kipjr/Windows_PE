@@ -1,13 +1,13 @@
 #https://go.microsoft.com/fwlink/?linkid=2165884 #ADK
 #https://go.microsoft.com/fwlink/?linkid=2166133 #ADK Add-on WinPE
 #https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-mount-and-customize?view=windows-11
+#https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/use-dism-in-windows-powershell-s14?view=windows-11
 
 $json=get-content -path .\env.json -raw | convertfrom-json
 $adkPATH="C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit"
 $WinPEPATH="$adkPATH\Windows Preinstallation Environment"
 $WinPEOCPath="$WinPEPATH\amd64\WinPE_OCs"
 
-$dismPATH="$env:systemroot\System32\Dism.exe" 
 $DeployImagingToolsENV="$adkPATH\Deployment Tools\DandISetEnv.bat" #Deployment and Imaging Tools Environment
 
 
@@ -21,21 +21,19 @@ $DeployImagingToolsENV="$adkPATH\Deployment Tools\DandISetEnv.bat" #Deployment a
     
 
     "Mounting image" | write-host -foregroundcolor magenta
-    & "$env:systemroot\System32\Dism.exe" /Mount-Image /ImageFile:"$env:GITHUB_WORKSPACE\WinPE_amd64\media\sources\boot.wim" /index:1 /MountDir:"$env:GITHUB_WORKSPACE\WinPE_amd64\mount"
+    Mount-WindowsImage -ImagePath "$env:GITHUB_WORKSPACE\WinPE_amd64\media\sources\boot.wim"  -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount"
+    
 
     "Adding Optional Components" | write-host -foregroundcolor magenta
     foreach($c in $json.WinPEOptionalComponents){
         "Adding: $c" | write-host -foregroundcolor cyan
-        $command1="$env:systemroot\System32\Dism.exe /Mount-Image /ImageFile:$env:GITHUB_WORKSPACE\WinPE_amd64\mount /PackagePath:$WinPEOCPath\$c.cab"
-        $command2="$env:systemroot\System32\Dism.exe /Mount-Image /ImageFile:$env:GITHUB_WORKSPACE\WinPE_amd64\mount /PackagePath:$WinPEOCPath\en-us\$c.cab"
-
-        & "$command1"
-        & "$command2"
+        Add-WindowsPackage -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -PackagePath "$WinPEOCPath\$c.cab"
+        Add-WindowsPackage -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -PackagePath "$WinPEOCPath\en-us\$c.cab"
     }
 
     "Unmounting image" | write-host -foregroundcolor magenta
-    & "$env:systemroot\System32\Dism.exe" /Unmount-Image /MountDir:"$env:GITHUB_WORKSPACE\WinPE_amd64\mount" /commit
-
+    Dismount-WindowsImage -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -Save
+    
     "Start the Deployment and Imaging Tools Environment & Create ISO file" | write-host -foregroundcolor magenta
     cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO %GITHUB_WORKSPACE%\WinPE_amd64 %GITHUB_WORKSPACE%\WinPE_amd64.iso && exit"
 #} catch {
