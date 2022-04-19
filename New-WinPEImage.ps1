@@ -29,7 +29,7 @@ foreach($c in $json.WinPEOptionalComponents){
     } else {
      "$c`_en-us.cab not found.. continuing" | write-host -foregroundcolor cyan
     }
-
+}
 
 <#     "Adding lines to winpeshl.ini" | write-host -ForegroundColor magenta
 "[LaunchApps]" | Out-File -FilePath .\winpeshl.ini
