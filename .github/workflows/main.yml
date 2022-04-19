@@ -17,32 +17,27 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  test:
-    name: PSScriptAnalyzer
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Run PSScriptAnalyzer
-        uses: microsoft/psscriptanalyzer-action@2044ae068e37d0161fa2127de04c19633882f061
-        with:
-          # Check https://github.com/microsoft/action-psscriptanalyzer for more info about the options.
-          # The below set up runs PSScriptAnalyzer to your entire repository and runs some basic security rules.
-          path: .\
-          recurse: true 
-          # Include your own basic security rules. Removing this option will run all the rules 
-          includeRule: '"PSAvoidGlobalAliases", "PSAvoidUsingConvertToSecureStringWithPlainText"'
-          output: results.sarif
-      
-      # Upload the SARIF file generated in the previous step
-      - name: Upload SARIF results file
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: results.sarif
+  # test:
+    # name: PSScriptAnalyzer
+    # runs-on: ubuntu-latest
+    # steps:
+      # - uses: actions/checkout@v2
+      # - name: Run PSScriptAnalyzer # Check https://github.com/microsoft/action-psscriptanalyzer
+        # uses: microsoft/psscriptanalyzer-action@v1.0
+        # with:
+          # path: .\
+          # recurse: true 
+          # includeRule: '"PSAvoidGlobalAliases", "PSAvoidUsingConvertToSecureStringWithPlainText"'
+          # output: results.sarif
+      # - name: Upload SARIF results file
+        # uses: github/codeql-action/upload-sarif@v1
+        # with:
+          # sarif_file: results.sarif
 
 
   build:
     runs-on: windows-latest
+    # needs: test
     steps:
       - name: Install Choco
         shell: pwsh
@@ -59,9 +54,23 @@ jobs:
       - name: Build the WinPE image
         shell: pwsh
         run: .\New-WinPEImage.ps1
+      - name: Generate filelist
+        shell: pwsh
+        run: |
+          get-childitem . -Recurse -File | select @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist.csv -Delimiter ";"
       - name: upload artifact
         uses: actions/upload-artifact@v3
+        if:  ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
-          name: WinPE_amd64.iso
-          path: .\WinPE_amd64.iso
-          if-no-files-found: error     
+          name: WinPE_amd64
+          path: |
+            .\WinPE_amd64.iso
+            .\filelist.csv
+          if-no-files-found: error
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            .\WinPE_amd64.iso
+            .\filelist.csv
