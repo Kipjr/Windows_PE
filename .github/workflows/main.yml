@@ -60,9 +60,17 @@ jobs:
           get-childitem . -Recurse -File | select @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist.csv -Delimiter ";"
       - name: upload artifact
         uses: actions/upload-artifact@v3
+        if:  ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
           name: WinPE_amd64.iso
           path: |
             .\WinPE_amd64.iso
             .\filelist.csv
-          if-no-files-found: error     
+          if-no-files-found: error
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            .\WinPE_amd64.iso
+            .\filelist.csv
