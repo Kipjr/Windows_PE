@@ -22,9 +22,9 @@ on:
         type: choice
         options:
         - Standard
-        - HP
+        - HP #https://ftp.hp.com/pub/softpaq/sp132501-133000/sp132903.exe
         - Dell #https://dl.dell.com/FOLDER08340832M/1/WinPE10.0-Drivers-A26-X0D0G.CAB
-        - Lenovo 
+        - Lenovo #https://download.lenovo.com/pccbbs/mobiles/rtk-winpe-w10.zip | https://download.lenovo.com/ibmdl/pub/pc/pccbbs/mobiles/usb_3_pro_dock_nic.rar | https://download.lenovo.com/km/media/attachment/rtk_winpe-new.7z | https://download.lenovo.com/km/media/attachment/USBCG2.zip
       MDT:
         description: 'Include MDT'
         required: true 
