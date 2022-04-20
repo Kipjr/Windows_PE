@@ -3,6 +3,7 @@
 #https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-mount-and-customize?view=windows-11
 #https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/use-dism-in-windows-powershell-s14?view=windows-11
 
+$branding = $env:INPUT_BRANDING
 $json=get-content -path .\env.json -raw | convertfrom-json
 $adkPATH="C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit"
 $WinPEPATH="$adkPATH\Windows Preinstallation Environment"
@@ -78,9 +79,10 @@ Set-Location $oldloc
  #>
  
 "Adding drivers" | write-host -ForegroundColor magenta    
-foreach($b in $json.bootdrivers){
+foreach($b in $json.bootdrivers[$branding]){
     "$b" | write-host -ForegroundColor cyan
-    $infitem = get-childitem $json.bootdrivers -Recurse  -Filter "*.inf" | select -ExpandProperty FullName
+    #if($b -match 'https?:\/\/.*'){
+    $infitem = get-childitem $json.bootdrivers[$branding] -Recurse  -Filter "*.inf" | select -ExpandProperty FullName
     foreach($i in $infitem){
         if(test-path -path $i) {
             Add-WindowsDriver -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -Driver "$i" -ForceUnsigned
@@ -108,7 +110,7 @@ copy-item -Path ".\source\_iso" -destination "$env:GITHUB_WORKSPACE\WinPE_amd64"
 
 
 <# 
-    Add Drivers
+    Create ISO
  #>
 
 "Start the Deployment and Imaging Tools Environment & Create ISO file from WinPE_amd64 folder" | write-host -foregroundcolor magenta
