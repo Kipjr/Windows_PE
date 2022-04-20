@@ -18,9 +18,10 @@ on:
       branding:
         description: 'Type of endpoint device'
         required: true
-        default: 'standard' 
+        default: 'Standard' 
         type: choice
         options:
+        - Standard
         - HP
         - Dell
         - Lenovo 
