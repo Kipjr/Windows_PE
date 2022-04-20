@@ -3,13 +3,14 @@
 #https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-mount-and-customize?view=windows-11
 #https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/use-dism-in-windows-powershell-s14?view=windows-11
 
+$arch="x64"
 $branding = $env:INPUT_BRANDING
 $json=get-content -path .\env.json -raw | convertfrom-json
 $adkPATH="C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit"
 $WinPEPATH="$adkPATH\Windows Preinstallation Environment"
 $DeployImagingToolsENV="$adkPATH\Deployment Tools\DandISetEnv.bat" #Deployment and Imaging Tools Environment
+New-Item -ItemType Directory -Path . -Name sources\Drivers\$branding -verbose #folder for drivers of $Brand
 
-<# 
     Creation of WinPE
  #>
  
@@ -61,8 +62,8 @@ copy-item ./winpeshl.ini "$env:GITHUB_WORKSPACE\WinPE_amd64\mount\windows\system
 "Adding Files & Folders to WinPE" | write-host -ForegroundColor magenta
 $oldloc=get-location 
 set-location .\source\_winpe
-$folders = get-childitem -directory -Path "." -Recurse |  where {$_.FullName -notlike "*.ignore*"}  | Resolve-Path -Relative
-$files = get-childitem -file -Path "." -Recurse |  where {$_.FullName -notlike "*.ignore*"}   | Resolve-Path -Relative
+$folders = get-childitem -directory -Path "." -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}  | Resolve-Path -Relative
+$files = get-childitem -file -Path "." -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}   | Resolve-Path -Relative
 
 foreach($fo in $folders) {
     if(!(test-path -path "$WinPE_root\$fo")){
@@ -79,17 +80,38 @@ Set-Location $oldloc
  #>
  
 "Adding drivers" | write-host -ForegroundColor magenta    
-foreach($b in $json.bootdrivers[$branding]){
+foreach($b in $json.bootdrivers.$branding){
     "$b" | write-host -ForegroundColor cyan
-    #if($b -match 'https?:\/\/.*'){
-    $infitem = get-childitem $json.bootdrivers[$branding] -Recurse  -Filter "*.inf" | select -ExpandProperty FullName
-    foreach($i in $infitem){
-        if(test-path -path $i) {
-            Add-WindowsDriver -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -Driver "$i" -ForceUnsigned
+    if((test-path($b)) -and ($b -like ".\source\Drivers\*")){
+        #it's a file path and in .\source\Drivers\
+    }
+    elseif($b -match 'https?://.*?\.(zip|rar|exe|7z|cab)') {
+        #it's a web url
+        $filename = $b | split-path -Leaf
+        $foldername = $filename | Split-Path -LeafBase
+        $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+        $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
+        Invoke-WebRequest -UseBasicParsing -Uri "$b" -WebSession $session -OutFile .\temp\$filename
+        #Expand-Archive -Path  -DestinationPath .\source\Drivers\$foldername
+        7z t ".\temp\$filename"
+        if($LASTEXITCODE -eq 0){
+            7z x -y ".\temp\$filename" -o".\source\Drivers\$branding\$foldername" 
+        } else {
+            "unable to extract $b " | write-host -ForegroundColor cyan
+            continue
         }
     }
+    else {
+        "$b is not a file or an URL" | write-host -ForegroundColor cyan
+        continue
+    }
 }
-
+$infitem = get-childitem .\source\Drivers\$branding\ -Recurse  -Filter "*.inf" | where-object {$_.FullName -like "$arch" } | Select-Object -ExpandProperty FullName
+    foreach($i in $infitem){
+        if(test-path -path $i) {
+            Add-WindowsDriver -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -Driver "$i"
+    }
+}
 <# 
     Generating hash of contents
  #>
@@ -114,7 +136,7 @@ copy-item -Path ".\source\_iso" -destination "$env:GITHUB_WORKSPACE\WinPE_amd64"
  #>
 
 "Start the Deployment and Imaging Tools Environment & Create ISO file from WinPE_amd64 folder" | write-host -foregroundcolor magenta
-cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO %GITHUB_WORKSPACE%\WinPE_amd64 %GITHUB_WORKSPACE%\WinPE_amd64.iso && exit"
+cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO %GITHUB_WORKSPACE%\WinPE_amd64 %GITHUB_WORKSPACE%\WinPE_amd64_$branding.iso && exit"
 
 # get-content -path "C:\Windows\Logs\DISM\dism.log" | Where-Object {$_ -like "$(get-date -f 'yyyy-MM-dd')*"} | Select-Object -Last 250
 
