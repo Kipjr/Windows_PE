@@ -107,7 +107,7 @@ foreach($b in $json.bootdrivers.$branding){
         continue
     }
 }
-$infitem = get-childitem ".\source\Drivers\$branding" -Recurse  -Filter "*.inf" | where-object {$_.FullName -like "$arch" } | Select-Object -ExpandProperty FullName
+$infitem = get-childitem ".\source\Drivers\" -Recurse  -Filter "*.inf" | where-object {$_.FullName -like "$arch" } | Select-Object -ExpandProperty FullName
     foreach($i in $infitem){
         if(test-path -path $i) {
             Add-WindowsDriver -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -Driver "$i"
