@@ -12,12 +12,17 @@ $DeployImagingToolsENV="$adkPATH\Deployment Tools\DandISetEnv.bat" #Deployment a
 New-Item -ItemType Directory -Path . -Name source\Drivers\$branding -verbose #folder for drivers of $Brand
 New-Item -ItemType Directory -Path . -Name source\_iso -verbose #folder for drivers of $Brand
 
+
 <#
     Creation of WinPE
  #>
  
 "Start the Deployment and Imaging Tools Environment & Create WinPE for amd64" | write-host -foregroundcolor magenta
 cmd /k """$DeployImagingToolsENV"" && copype.cmd amd64 %GITHUB_WORKSPACE%\WinPE_amd64 && exit"
+
+foreach($f in @("Tools","Templates","Servicing","Scripts","Packages","Out-of-Box Drivers","Operating Systems","Control","Captures","Boot","Backup","Applications","`$OEM`$")){
+    New-Item -ItemType Directory -path  "$env:GITHUB_WORKSPACE\WinPE_amd64" -name $f  
+} #generate folderstructure
 
 "Mounting boot.wim image" | write-host -foregroundcolor magenta
 Mount-WindowsImage -ImagePath "$env:GITHUB_WORKSPACE\WinPE_amd64\media\sources\boot.wim" -index 1  -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount"
