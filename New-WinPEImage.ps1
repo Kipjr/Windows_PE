@@ -136,15 +136,14 @@ Dismount-WindowsImage -Path "$env:GITHUB_WORKSPACE\WinPE_amd64\mount" -Save
 
 
 "Adding Contents of source\_iso to ISO" | write-host -ForegroundColor magenta
-copy-item -Path ".\source\_iso" -destination "$env:GITHUB_WORKSPACE\WinPE_amd64" -recurse -verbose
-
+copy-item -Path ".\source\_iso\*" -destination "$env:GITHUB_WORKSPACE\WinPE_amd64" -recurse -verbose
 
 <# 
     Create ISO
  #>
 
 "Start the Deployment and Imaging Tools Environment & Create ISO file from WinPE_amd64 folder" | write-host -foregroundcolor magenta
-cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO %GITHUB_WORKSPACE%\WinPE_amd64 %GITHUB_WORKSPACE%\WinPE_amd64_$branding.iso && exit"
+cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO %GITHUB_WORKSPACE%\WinPE_amd64 %GITHUB_WORKSPACE%\WinPE_amd64.iso && exit"
 
 # get-content -path "C:\Windows\Logs\DISM\dism.log" | Where-Object {$_ -like "$(get-date -f 'yyyy-MM-dd')*"} | Select-Object -Last 250
 
