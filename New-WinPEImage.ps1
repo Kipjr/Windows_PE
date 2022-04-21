@@ -10,6 +10,7 @@ $adkPATH="C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit"
 $WinPEPATH="$adkPATH\Windows Preinstallation Environment"
 $DeployImagingToolsENV="$adkPATH\Deployment Tools\DandISetEnv.bat" #Deployment and Imaging Tools Environment
 New-Item -ItemType Directory -Path . -Name sources\Drivers\$branding -verbose #folder for drivers of $Brand
+New-Item -ItemType Directory -Path . -Name sources\_iso -verbose #folder for drivers of $Brand
 
 <#
     Creation of WinPE
