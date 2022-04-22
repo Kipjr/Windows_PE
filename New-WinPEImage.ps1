@@ -1,7 +1,7 @@
 Param(
-    $branding = "all" #$env:INPUT_BRANDING
-    $mdt = $false #$env:INPUT_MDT
-    $arch="x64"
+    $branding = "all",
+    $mdt = $false,
+    $arch="x64",
     $workingDirectory=$env:GITHUB_WORKSPACE
 )
 #https://go.microsoft.com/fwlink/?linkid=2165884 #ADK
