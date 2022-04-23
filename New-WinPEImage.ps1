@@ -223,6 +223,34 @@ General notes
     copy-item -Path ".\source\_iso\*" -destination "$ISO_root" -recurse -verbose
 }
 
+Function Set-BCDData() {
+<#
+.SYNOPSIS
+from .\WinPE_$arch create .iso file
+
+.NOTES
+General notes
+#>
+
+    "update *.wim in BCD" | write-host -foregroundcolor magenta
+    $wimPath = get-childitem *.wim -Recurse | select -ExpandProperty FullName #find wim and get path
+    $filePath = $wimpath.substring($ISO_root.length, ($wimpath.length - $ISO_root.length) ) #get relative path
+    
+    #bcdedit [/store <filename>] /set [{<id>}] <datatype> <value>
+    
+    $bcdPath1 = "$ISO_root\Boot\BCD" #$ISO_root\EFI\Microsoft\Boot\BCD
+    $bcdFriendlyIdentifier1 = Get-BcdEntry -Id default -Store "$bcdPath1" |  Select-String -expandproperty FriendlyIdentifier  #win11 only module
+    $bcdstring1 = 'ramdisk=[boot]' + "$filepath,$bcdFriendlyIdentifier1"
+    $commands1= @("device","osdevice") | foreach-object { "bcdedit --% /store `"$bcdpath1`" /set `{default`} $_ $bcdstring1" } #https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.2#the-stop-parsing-token
+    $commands1 | foreach-object { invoke-expression $_ }
+
+    $bcdPath2 = "$ISO_$root\EFI\Microsoft\Boot\BCD"
+    $bcdFriendlyIdentifier2 = Get-BcdEntry -Id default -Store "$bcdPath2" |  Select-String -expandproperty FriendlyIdentifier  #win11 only module
+    $bcdstring2 = 'ramdisk=[boot]' + "$filepath,$bcdFriendlyIdentifier2"
+    $commands2= @("device","osdevice") | foreach-object { "bcdedit --% /store `"$bcdpath2`" /set `{default`} $_ $bcdstring2" } #https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.2#the-stop-parsing-token
+    $commands2 | foreach-object { invoke-expression $_ }
+}
+
 Function New-ISO(){
 <#
 .SYNOPSIS
@@ -247,5 +275,6 @@ Add-BootDrivers
 Get-HashOfContents
 Dismount-Image
 Add-FilesToIso
+Set-BCDData
 New-ISO
 
