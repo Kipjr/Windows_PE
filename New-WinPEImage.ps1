@@ -10,7 +10,6 @@ Param(
 #https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/use-dism-in-windows-powershell-s14?view=windows-11
 
 
-
 $json=get-content -path .\env.json -raw | convertfrom-json
 $adkPATH="C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit"
 $WinPEPATH="$adkPATH\Windows Preinstallation Environment"
@@ -21,7 +20,6 @@ $ISO_root = "$workingDirectory\WinPE_amd64\media"
 New-Item -ItemType Directory -Path . -Name temp -verbose #folder for temporary files                                                                                   
 New-Item -ItemType Directory -Path . -Name source\Drivers\$branding -verbose #folder for drivers of $Brand
 New-Item -ItemType Directory -Path . -Name source\_iso -verbose #folder for drivers of $Brand
-
 
 function New-WinPE() {
 <#
@@ -250,3 +248,4 @@ Get-HashOfContents
 Dismount-Image
 Add-FilesToIso
 New-ISO
+

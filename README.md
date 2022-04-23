@@ -11,6 +11,7 @@ Full Windows UEFI Boot schematic of Windows PE
 
 %%{init: {'theme': 'dark', 'themeVariables': { 'darkMode': 'true'}}}%%
 
+
 flowchart TB
     WR[Winlogon.exe reads HKLM\System\Setup\CmdLine:<br> winpeshl.exe]
     WP[winpeshl.exe runs]
@@ -18,11 +19,13 @@ flowchart TB
     RE[Run Setup.exe]
     RW[Read winpeshl.ini]
     AP{Winpeshl.ini exist and has valid content?}
+
     MD{MDT is included?}
     RS[Run <br>cmd /k %SYSTEMROOT\system32\startnet.cmd]
     SN[Startnet.cmd: <br>wpeinit.exe]
     RA[Run applications as specified in winpeshl.ini]
     BR[%SYSTEMROOT%\System32\bddrun.exe /bootstrap]
+
     UE{Unattend.xml exist?}
     UX[Unattend.xml:<br>RunSynchronousCommand<br> wscript.exe X:\Deploy\Scripts\LiteTouch.wsf]
     WI[wpeinit.exe]
@@ -49,6 +52,7 @@ flowchart TB
     SM[SMSS.exe]
     W3[Win32k.sys]
     WN[Winlogon.exe]
+
 
 
 subgraph UEFI [UEFI Boot]
@@ -105,7 +109,6 @@ subgraph MDT [MDT]
     DW ==> RT
     RT ==> ET
 end
-
 
 end
 UX -...- |ERROR| cmd
