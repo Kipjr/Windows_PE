@@ -24,35 +24,56 @@ New-Item -ItemType Directory -Path . -Name source\_iso -verbose #folder for driv
 
 
 function New-WinPE() {
+<#
+.SYNOPSIS
+Create new WinPE Environment
+
+.NOTES
+General notes
+#>
     "Start the Deployment and Imaging Tools Environment & Create WinPE for amd64" | write-host -foregroundcolor magenta
     cmd /k """$DeployImagingToolsENV"" && copype.cmd amd64 ""$workingDirectory""\WinPE_amd64 && exit"
 }
 
 function New-FolderStructure() {
-<# 
-  generate folderstructure
-#>
+<#
+.SYNOPSIS
+generate folderstructure
 
-# Boot
-# Deploy 
-# EFI
-# bootmgr
-# bootmgr.efi    
+.NOTES
+    Boot
+    Deploy 
+    EFI
+    bootmgr
+    bootmgr.efi    
+#>
     foreach($f in @("Tools","Templates","Servicing","Scripts","Packages","Out-of-Box Drivers","Operating Systems","Control","Captures","Boot","Backup","Applications","`$OEM`$")){
-        New-Item -ItemType Directory -path  "$ISO_root" -name "$f"
+        New-Item -ItemType Directory -path  "$ISO_root\Deploy" -name "$f"
     } #generate folderstructure
     get-childitem -Path $ISO_root\* -exclude @("bootmgr","bootmgr.efi","sources","Boot","EFI") -Depth 0 | remove-item #cleanup                                                                                                                                                                                                                  
 }
 
 function Mount-WinPE() {
+<#
+.SYNOPSIS
+mount boot.wim to WinPE_amd64\mount
+
+.NOTES
+General notes
+#>
     "Mounting boot.wim image" | write-host -foregroundcolor magenta
     Mount-WindowsImage -ImagePath "$ISO_root\sources\boot.wim" -index 1  -Path "$WinPE_root"
 }
 
  Function Add-OptionalComponents() {
-<# 
-    Optional Components
- #>
+<#
+.SYNOPSIS
+Add WinPE Optional Components
+
+.NOTES
+General notes
+#>
+
     "Adding Optional Components to boot.wim" | write-host -foregroundcolor magenta
     foreach($c in $json.WinPEOptionalComponents){
         "Adding: $c" | write-host -foregroundcolor cyan
@@ -60,14 +81,19 @@ function Mount-WinPE() {
         if(test-path -path "$WinPEPATH\amd64\WinPE_OCs\en-us\$c`_en-us.cab" ){
             Add-WindowsPackage -Path "$WinPE_root" -PackagePath "$WinPEPATH\amd64\WinPE_OCs\en-us\$c`_en-us.cab" -PreventPending
         } else {
-         "$c`_en-us.cab not found.. continuing" | write-host -foregroundcolor cyan
+            "$c`_en-us.cab not found.. continuing" | write-host -foregroundcolor cyan
         }
     }
- }
+}
 function Add-DefaultStartCommands(){
-<# 
-    Default Start commands
- #> 
+<#
+.SYNOPSIS
+Default Start commands, immediately after booting WinPe
+
+.NOTES
+General notes
+#>
+
     "Adding lines to winpeshl.ini" | write-host -ForegroundColor magenta
     "[LaunchApps]" | Out-File -FilePath .\winpeshl.ini #write to local file
     foreach($p in $json.winpeshl_commands){
@@ -85,9 +111,14 @@ function Add-DefaultStartCommands(){
 }
 
 function Add-FilesToWinPE() {
-<# 
-    Add files & folders to WinPE
- #>
+<#
+.SYNOPSIS
+Add files & folders to WinPE (Boot.wim)
+
+.NOTES
+only from .\source\_winpe where name does not contain .ignore
+#>
+
     "Adding Files & Folders to WinPE" | write-host -ForegroundColor magenta
     $oldloc=get-location 
     set-location .\source\_winpe
@@ -106,9 +137,14 @@ function Add-FilesToWinPE() {
 }
 
 function Add-BootDrivers(){
-<# 
-    Add Drivers
- #>
+<#
+.SYNOPSIS
+Add Boot-critical Drivers from HP,Dell or Lenovo
+
+.NOTES
+Net, Disk, Chipset (Thunderbolt)
+#>
+
     $arr = if($branding -eq "all") {
         $json.bootdrivers.PSOBJect.Properties.value
     } elseif($branding -eq "none") {
@@ -152,32 +188,51 @@ function Add-BootDrivers(){
 }
 
 Function get-HashOfContents() {
-<# 
-    Generating hash of contents
- #>
- 
+<#
+.SYNOPSIS
+Create hash of filecontens of boot.wim
+
+.NOTES
+General notes
+#>
+
     "Generating hash of contents boot.wim " | write-host -foregroundcolor magenta #issue with access denied
-     get-childitem "$WinPE_root" -Recurse -File | select @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist_boot.wim.csv -Delimiter ";"
+    get-childitem "$WinPE_root" -Recurse -File | select @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist_boot.wim.csv -Delimiter ";"
 }
 
 Function Dismount-Image(){
-<# 
-    Umounting & create iso
- #>
+<#
+.SYNOPSIS
+Unmount /mount to boot.wim
+
+.NOTES
+General notes
+#>
  
     "Unmounting boot.wim image" | write-host -foregroundcolor magenta
     Dismount-WindowsImage -Path "$WinPE_root" -Save
 }
 
 Function Add-FilesToIso(){
+<#
+.SYNOPSIS
+Add other files to iso file
+
+.NOTES
+General notes
+#>
     "Adding Contents of source\_iso to ISO" | write-host -ForegroundColor magenta
     copy-item -Path ".\source\_iso\*" -destination "$ISO_root" -recurse -verbose
 }
 
-Function Create-ISO(){
-<# 
-    Create ISO
- #>
+Function New-ISO(){
+<#
+.SYNOPSIS
+from .\WinPE_amd64 create .iso file
+
+.NOTES
+General notes
+#>
 
     "Start the Deployment and Imaging Tools Environment & Create ISO file from WinPE_amd64 folder" | write-host -foregroundcolor magenta
     cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO ""$workingDirectory""\WinPE_amd64 ""$workingDirectory""\WinPE_amd64.iso && exit"
@@ -194,4 +249,4 @@ Add-BootDrivers
 Get-HashOfContents
 Dismount-Image
 Add-FilesToIso
-Create-ISO
+New-ISO
