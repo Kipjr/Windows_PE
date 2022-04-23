@@ -8,6 +8,10 @@ Full Windows UEFI Boot schematic of Windows PE
 
 
 ```mermaid
+
+%%{init: {'theme': 'dark', 'themeVariables': { 'darkMode': 'true'}}}%%
+
+
 flowchart TB
     WR[Winlogon.exe reads HKLM\System\Setup\CmdLine:<br> winpeshl.exe]
     WP[winpeshl.exe runs]
@@ -15,9 +19,13 @@ flowchart TB
     RE[Run Setup.exe]
     RW[Read winpeshl.ini]
     AP{Winpeshl.ini exist and has valid content?}
+
+    MD{MDT is included?}
     RS[Run <br>cmd /k %SYSTEMROOT\system32\startnet.cmd]
     SN[Startnet.cmd: <br>wpeinit.exe]
-    RA[Run applications as specified in winpeshl.ini<br>Default: %SYSTEMROOT%\System32\bddrun.exe /bootstrap]
+    RA[Run applications as specified in winpeshl.ini]
+    BR[%SYSTEMROOT%\System32\bddrun.exe /bootstrap]
+
     UE{Unattend.xml exist?}
     UX[Unattend.xml:<br>RunSynchronousCommand<br> wscript.exe X:\Deploy\Scripts\LiteTouch.wsf]
     WI[wpeinit.exe]
@@ -44,60 +52,63 @@ flowchart TB
     SM[SMSS.exe]
     W3[Win32k.sys]
     WN[Winlogon.exe]
-    
+
+
 
 subgraph UEFI [UEFI Boot]
-    PO --> LF
-    LF --> BI
-    BI --> LB
+    PO ==> LF
+    LF ==> BI
+    BI ==> LB
     subgraph WBM [Windows Boot Manager]
-        LB --> BM
-        BM --> RB
+        LB ==> BM
+        BM ==> RB
     end
-    RB --> WL 
+    RB ==> WL
     subgraph WBL [Windows Boot Loader]
-        WL --> LO
+        WL ==> LO
     end
     subgraph KRN [Windows NT OS Kernel]
-        LO --> NL
-        NL --> SM
+        LO ==> NL
+        NL ==> SM
         SM -.-> W3
-        SM --> WN
+        SM ==> WN
     end
-    
+
 end
-WN--> WR
-subgraph WinPE 
-    WR --> WP --> SE
-    SE --> |yes| RE 
-    SE --> |no | RW
-    RW --> AP
-    AP --> |yes| RA
-    AP --> |no | RS
+WN==> WR
+subgraph WinPE
+    WR ==> WP ==> SE
+    SE ==> |yes| RE
+    SE ==> |no | RW
+    RW ==> AP
+    AP ==> |yes| RA
+    MD ==> |yes| BR
+    MD ==> |no| cmd
+    RA ==> MD
+    AP ==> |no | RS
+
+
 
 subgraph cmd [cmd.exe]
-    RS --> SN
-    
+    RS ==> SN
 end
+    BD ==> WI
+subgraph MDT [MDT]
+    BR ==> BD
     SN -.-> WI
-    RA --> BD
-    BD --> WI
+
     WI -.-> UE
-    
-    
-    UE --> |yes| UX 
-
-    UX --> LT --> LP
-
-    LP --> |no| NT
-    LP --> |yes| ET
-
-    NT --> |ZTIGather| BS
-    BS --> WW
-    WW --> CS
-    CS --> DW
-    DW --> RT
-    RT --> ET
+    UE ==> |yes| UX
+    UX ==> LT ==> LP
+    LP ==> |no| NT
+    LP ==> |yes| ET
+    NT ==> |ZTIGather| BS
+    BS ==> WW
+    WW ==> CS
+    CS ==> DW
+    DW ==> RT
+    RT ==> ET
+end
 
 end
 UX -...- |ERROR| cmd
