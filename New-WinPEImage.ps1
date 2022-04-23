@@ -1,7 +1,7 @@
 Param(
     $branding = "all",
     $mdt = $false,
-    $arch="x64",
+    $arch="amd64",
     $workingDirectory=$env:GITHUB_WORKSPACE
 )
 #https://go.microsoft.com/fwlink/?linkid=2165884 #ADK
@@ -11,11 +11,12 @@ Param(
 
 
 $json=get-content -path .\env.json -raw | convertfrom-json
-$adkPATH="C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit"
-$WinPEPATH="$adkPATH\Windows Preinstallation Environment"
-$DeployImagingToolsENV="$adkPATH\Deployment Tools\DandISetEnv.bat" #Deployment and Imaging Tools Environment
-$WinPE_root = "$workingDirectory\WinPE_amd64\mount"
-$ISO_root = "$workingDirectory\WinPE_amd64\media"
+if($arch -eq "amd64"){$arch_short="x64"} else {$arch_short=$arch}
+set-variable -name adkPATH      -value  "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit" -verbose
+set-variable -name WinPEPATH    -value  "$adkPATH\Windows Preinstallation Environment" -verbose 
+set-variable -name DeployImagingToolsENV -value "$adkPATH\Deployment Tools\DandISetEnv.bat" -verbose  #Deployment and Imaging Tools Environment
+set-variable -name WinPE_root   -value  "$workingDirectory\WinPE_$arch\mount" -verbose 
+set-variable -name ISO_root     -value  "$workingDirectory\WinPE_$arch\media" -verbose
 
 New-Item -ItemType Directory -Path . -Name temp -verbose #folder for temporary files                                                                                   
 New-Item -ItemType Directory -Path . -Name source\Drivers\$branding -verbose #folder for drivers of $Brand
@@ -27,10 +28,17 @@ function New-WinPE() {
 Create new WinPE Environment
 
 .NOTES
-General notes
+outputfolder will contain:
+- fwfiles: efisys.bin,etfsboot.com
+- media: sources, bootmgr,bootmgr.efi, EFI, BOOT
+- mount: empty
 #>
-    "Start the Deployment and Imaging Tools Environment & Create WinPE for amd64" | write-host -foregroundcolor magenta
-    cmd /k """$DeployImagingToolsENV"" && copype.cmd amd64 "$workingDirectory"\WinPE_amd64 && exit"
+    "Start the Deployment and Imaging Tools Environment & Create WinPE for $arch" | write-host -foregroundcolor magenta
+    cmd /k """$DeployImagingToolsENV"" && copype.cmd $arch ""$workingDirectory\WinPE_$arch"" && exit"
+    if(!(test-path -path "$workingDirectory\WinPE_$arch")){
+        "unable to create $workingDirectory\WinPE_$arch" | write-host -foregroundcolor cyan
+        exit 1
+    }
 }
 
 function New-FolderStructure() {
@@ -40,27 +48,29 @@ generate folderstructure
 
 .NOTES
     Boot
-    Deploy 
+    Deploy\Boot\{boot.wim -> LiteTouchPE_x64.wim} 
     EFI
     bootmgr
     bootmgr.efi    
 #>
+    get-childitem -Path $ISO_root\* -exclude @("bootmgr","bootmgr.efi","sources","Boot","EFI") -Depth 0 | remove-item -recurse #cleanup
     foreach($f in @("Tools","Templates","Servicing","Scripts","Packages","Out-of-Box Drivers","Operating Systems","Control","Captures","Boot","Backup","Applications","`$OEM`$")){
         New-Item -ItemType Directory -path  "$ISO_root\Deploy" -name "$f"
     } #generate folderstructure
-    get-childitem -Path $ISO_root\* -exclude @("bootmgr","bootmgr.efi","sources","Boot","EFI") -Depth 0 | remove-item #cleanup                                                                                                                                                                                                                  
+    move-item -path "$ISO_root\sources\boot.wim" "$ISO_root\Deploy\Boot\"
+    remove-item -path "$ISO_root\sources" -force 
 }
 
 function Mount-WinPE() {
 <#
 .SYNOPSIS
-mount boot.wim to WinPE_amd64\mount
+mount boot.wim to WinPE_$arch\mount
 
 .NOTES
 General notes
 #>
     "Mounting boot.wim image" | write-host -foregroundcolor magenta
-    Mount-WindowsImage -ImagePath "$ISO_root\sources\boot.wim" -index 1  -Path "$WinPE_root"
+    Mount-WindowsImage -ImagePath "$ISO_root\Deploy\Boot\boot.wim" -index 1  -Path "$WinPE_root"
 }
 
  Function Add-OptionalComponents() {
@@ -75,9 +85,9 @@ General notes
     "Adding Optional Components to boot.wim" | write-host -foregroundcolor magenta
     foreach($c in $json.WinPEOptionalComponents){
         "Adding: $c" | write-host -foregroundcolor cyan
-        Add-WindowsPackage -Path "$WinPE_root" -PackagePath "$WinPEPATH\amd64\WinPE_OCs\$c.cab" -PreventPending
-        if(test-path -path "$WinPEPATH\amd64\WinPE_OCs\en-us\$c`_en-us.cab" ){
-            Add-WindowsPackage -Path "$WinPE_root" -PackagePath "$WinPEPATH\amd64\WinPE_OCs\en-us\$c`_en-us.cab" -PreventPending
+        Add-WindowsPackage -Path "$WinPE_root" -PackagePath "$WinPEPATH\$arch\WinPE_OCs\$c.cab" -PreventPending
+        if(test-path -path "$WinPEPATH\$arch\WinPE_OCs\en-us\$c`_en-us.cab" ){
+            Add-WindowsPackage -Path "$WinPE_root" -PackagePath "$WinPEPATH\$arch\WinPE_OCs\en-us\$c`_en-us.cab" -PreventPending
         } else {
             "$c`_en-us.cab not found.. continuing" | write-host -foregroundcolor cyan
         }
@@ -177,7 +187,7 @@ Net, Disk, Chipset (Thunderbolt)
             continue
         }
     }
-    $infitem = get-childitem ".\source\Drivers" -Recurse  -Filter "*.inf" | where-object {$_.FullName -like "$arch" } | Select-Object -ExpandProperty FullName
+    $infitem = get-childitem ".\source\Drivers" -Recurse  -Filter "*.inf" | where-object {$_.FullName -like "$arch_short" } | Select-Object -ExpandProperty FullName
         foreach($i in $infitem){
             if(test-path -path $i) {
                 Add-WindowsDriver -Path "$WinPE_root" -Driver "$i"
@@ -254,14 +264,14 @@ General notes
 Function New-ISO(){
 <#
 .SYNOPSIS
-from .\WinPE_amd64 create .iso file
+from .\WinPE_$arch create .iso file
 
 .NOTES
 General notes
 #>
 
-    "Start the Deployment and Imaging Tools Environment & Create ISO file from WinPE_amd64 folder" | write-host -foregroundcolor magenta
-    cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO ""$workingDirectory""\WinPE_amd64 ""$workingDirectory""\WinPE_amd64.iso && exit"
+    "Start the Deployment and Imaging Tools Environment & Create ISO file from WinPE_$arch folder" | write-host -foregroundcolor magenta
+    cmd /k """$DeployImagingToolsENV"" && makeWinPEMedia.cmd /ISO ""$workingDirectory\WinPE_$arch"" ""$workingDirectory\WinPE_$arch.iso"" && exit"
 }
 # get-content -path "C:\Windows\Logs\DISM\dism.log" | Where-Object {$_ -like "$(get-date -f 'yyyy-MM-dd')*"} | Select-Object -Last 250
 
