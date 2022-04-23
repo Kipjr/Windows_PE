@@ -30,7 +30,7 @@ Create new WinPE Environment
 General notes
 #>
     "Start the Deployment and Imaging Tools Environment & Create WinPE for amd64" | write-host -foregroundcolor magenta
-    cmd /k """$DeployImagingToolsENV"" && copype.cmd amd64 ""$workingDirectory""\WinPE_amd64 && exit"
+    cmd /k """$DeployImagingToolsENV"" && copype.cmd amd64 "$workingDirectory"\WinPE_amd64 && exit"
 }
 
 function New-FolderStructure() {
