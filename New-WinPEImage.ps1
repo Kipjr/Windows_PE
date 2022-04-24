@@ -247,20 +247,20 @@ General notes
 #>
 
     "update *.wim in BCD" | write-host -foregroundcolor magenta
-    $wimPath = get-childitem *.wim -Recurse | select -ExpandProperty FullName #find wim and get path
+    $wimPath =  get-childitem -path $ISO_root\*.wim -Recurse | select -ExpandProperty FullName #find wim and get path
     $filePath = $wimpath.substring($ISO_root.length, ($wimpath.length - $ISO_root.length) ) #get relative path
     
     #bcdedit [/store <filename>] /set [{<id>}] <datatype> <value>
     
-    $bcdPath1 = "$ISO_root\Boot\BCD" #$ISO_root\EFI\Microsoft\Boot\BCD
-    $bcdFriendlyIdentifier1 = Get-BcdEntry -Id default -Store "$bcdPath1" |  Select-String -expandproperty FriendlyIdentifier  #win11 only module
-    $bcdstring1 = 'ramdisk=[boot]' + "$filepath,$bcdFriendlyIdentifier1"
+    $bcdPath1 = "$ISO_root\Boot\BCD" #Legacy
+    $bcdstring1 = $(Get-BcdEntry -Store $bcdPath1  -id default).elements.where({$_.name -eq "device"}).value  #win11 only module
+    $bcdstring1 = $bcdstring1.Replace("\sources\boot.wim",$filePath)
     $commands1= @("device","osdevice") | foreach-object { "bcdedit --% /store `"$bcdpath1`" /set `{default`} $_ $bcdstring1" } #https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.2#the-stop-parsing-token
     $commands1 | foreach-object { invoke-expression $_ }
 
-    $bcdPath2 = "$ISO_$root\EFI\Microsoft\Boot\BCD"
-    $bcdFriendlyIdentifier2 = Get-BcdEntry -Id default -Store "$bcdPath2" |  Select-String -expandproperty FriendlyIdentifier  #win11 only module
-    $bcdstring2 = 'ramdisk=[boot]' + "$filepath,$bcdFriendlyIdentifier2"
+    $bcdPath2 = "$ISO_root\EFI\Microsoft\Boot\BCD" #EFI
+    $bcdstring2 = $(Get-BcdEntry -Store $bcdPath2 -id default).elements.where({$_.name -eq "device"}).value  #win11 only module
+    $bcdstring2 = $bcdstring2.Replace("\sources\boot.wim",$filePath)
     $commands2= @("device","osdevice") | foreach-object { "bcdedit --% /store `"$bcdpath2`" /set `{default`} $_ $bcdstring2" } #https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.2#the-stop-parsing-token
     $commands2 | foreach-object { invoke-expression $_ }
 }
