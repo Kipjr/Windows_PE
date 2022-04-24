@@ -76,6 +76,7 @@ General notes
 #>
     "Mounting boot.wim image" | write-host -foregroundcolor magenta
     Mount-WindowsImage -ImagePath "$ISO_root\Deploy\Boot\boot.wim" -index 1  -Path "$WinPE_root"
+    cmd /c "Dism /Set-ScratchSpace:1024 /Image:""$WinPE_root"""
 }
 
  Function Add-OptionalComponents() {
