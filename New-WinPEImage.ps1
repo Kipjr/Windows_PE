@@ -15,12 +15,16 @@ if($arch -eq "amd64"){$arch_short="x64"} else {$arch_short=$arch}
 set-variable -name adkPATH      -value  "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit" -verbose
 set-variable -name WinPEPATH    -value  "$adkPATH\Windows Preinstallation Environment" -verbose 
 set-variable -name DeployImagingToolsENV -value "$adkPATH\Deployment Tools\DandISetEnv.bat" -verbose  #Deployment and Imaging Tools Environment
+$old_loc=$PWD
+if(!(test-path -path $workingDirectory)){new-item -itemtype directory -path $workingDirectory}   
+set-location $workingDirectory
 set-variable -name WinPE_root   -value  "$workingDirectory\WinPE_$arch\mount" -verbose 
 set-variable -name ISO_root     -value  "$workingDirectory\WinPE_$arch\media" -verbose
 
-New-Item -ItemType Directory -Path . -Name temp -verbose #folder for temporary files                                                                                   
-New-Item -ItemType Directory -Path . -Name source\Drivers\$branding -verbose #folder for drivers of $Brand
-New-Item -ItemType Directory -Path . -Name source\_iso -verbose #folder for drivers of $Brand
+New-Item -ItemType Directory -Path . -Name temp -force -verbose #folder for temporary files                                                                                   
+New-Item -ItemType Directory -Path . -Name source\Drivers\$branding -force  -verbose #folder for drivers of $Brand
+New-Item -ItemType Directory -Path . -Name source\_iso -force  -verbose #folder for drivers of $Brand
+New-Item -ItemType Directory -Path . -Name source\_winpe -force  -verbose #folder _winpe files
 
 function New-WinPE() {
 <#
@@ -34,9 +38,10 @@ outputfolder will contain:
 - mount: empty
 #>
     "Start the Deployment and Imaging Tools Environment & Create WinPE for $arch" | write-host -foregroundcolor magenta
-    cmd /k """$DeployImagingToolsENV"" && copype.cmd $arch ""$workingDirectory\WinPE_$arch"" && exit"
-    if(!(test-path -path "$workingDirectory\WinPE_$arch")){
+    cmd /c """$DeployImagingToolsENV"" && copype.cmd $arch ""$workingDirectory\WinPE_$arch"" && exit"
+    if(!(test-path -path "$workingDirectory\WinPE_$arch") -or ($LASTEXITCODE -eq 1)){
         "unable to create $workingDirectory\WinPE_$arch" | write-host -foregroundcolor cyan
+        set-location $old_loc
         exit 1
     }
 }
@@ -287,3 +292,4 @@ Add-FilesToIso
 Set-BCDData
 New-ISO
 
+set-location $old_loc
