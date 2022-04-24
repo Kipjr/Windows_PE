@@ -187,11 +187,10 @@ Net, Disk, Chipset (Thunderbolt)
             continue
         }
     }
-    $infitem = get-childitem ".\source\Drivers" -Recurse  -Filter "*.inf" | where-object {$_.FullName -like "$arch_short" } | Select-Object -ExpandProperty FullName
-        foreach($i in $infitem){
-            if(test-path -path $i) {
-                Add-WindowsDriver -Path "$WinPE_root" -Driver "$i"
-        }
+    $infitem = get-childitem ".\source\Drivers" -Recurse  -Filter "*.inf" | where-object {$_.FullName -like "*$arch_short*" } | Select-Object -ExpandProperty FullName
+    foreach($i in $infitem){
+        "adding $i" | write-host -ForegroundColor cyan
+        Add-WindowsDriver -Path "$WinPE_root" -Driver "$i" -verbose
     }
 }
 
