@@ -286,7 +286,7 @@ Add-OptionalComponents
 Add-DefaultStartCommands
 Add-FilesToWinPE
 Add-BootDrivers
-Get-HashOfContents
+#Get-HashOfContents
 Dismount-Image
 Add-FilesToIso
 Set-BCDData
