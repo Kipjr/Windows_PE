@@ -23,6 +23,7 @@ set-variable -name WinPE_root   -value  "$workingDirectory\WinPE_$arch\mount" -v
 set-variable -name ISO_root     -value  "$workingDirectory\WinPE_$arch\media" -verbose
 
 if(!(test-path -path $workingDirectory)){new-item -itemtype directory -path $workingDirectory}   
+if(!(test-path -path .\source\_iso)){ New-Item -ItemType Directory -Path .\source -Name _iso -force -verbose } #create _iso in .\source (else error in "Adding Contents of source\_iso to ISO")
 if(!(test-path -path $workingDirectory\source)){copy-item -Path .\source -destination $workingDirectory -recurse}
 set-location $workingDirectory
 New-Item -ItemType Directory -Path $workingDirectory -Name temp -force -verbose #folder for temporary files                                                                                   
