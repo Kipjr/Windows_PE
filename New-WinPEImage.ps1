@@ -319,6 +319,7 @@ General notes
 New-WinPE
 New-FolderStructure
 Mount-WinPE
+#Add-DefaultStartCommands
 Add-OptionalComponents
 Add-DefaultStartCommands
 Add-FilesToWinPE
