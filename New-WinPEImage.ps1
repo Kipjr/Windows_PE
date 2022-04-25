@@ -160,30 +160,76 @@ General notes
     copy-item ./winpeshl.ini "$WinPE_root\windows\system32\winpeshl.ini"
 }
 
-function Add-FilesToWinPE() {
+
+function Add-AppsToWinPE(){
 <#
 .SYNOPSIS
-Add files & folders to WinPE (Boot.wim)
 
 .NOTES
-only from .\source\_winpe where name does not contain .ignore
+General notes
 #>
 
-    "Adding Files & Folders to WinPE" | write-host -ForegroundColor magenta
-    $oldloc=get-location 
-    set-location .\source\_winpe
-    $folders = get-childitem -directory -Path "." -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}  | Resolve-Path -Relative
-    $files = get-childitem -file -Path "." -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}   | Resolve-Path -Relative
+    # Powershell 7.2.2
+    invoke-restmethod -OutFile ".\temp\pwsh.ps1"  -Uri 'https://aka.ms/install-powershell.ps1'
+    .\temp\pwsh.ps1  -Destination "$WinPE_root\Program Files\PowerShell\7"
 
-    foreach($fo in $folders) {
-        if(!(test-path -path "$WinPE_root\$fo")){
-            New-Item -ItemType Directory "$WinPE_root\$fo" -verbose
+    #notepad ++
+    invoke-restmethod -OutFile ".\temp\npp.8.3.3.portable.x64.zip" -uri "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.3.3/npp.8.3.3.portable.x64.zip"
+    7z t ".\temp\npp.8.3.3.portable.x64.zip"
+    if($LASTEXITCODE -eq 0){
+        7z x -y ".\temp\npp.8.3.3.portable.x64.zip" -o"$WinPE_root\Program Files\Notepad++" 
+    }
+    #launchbar
+    Invoke-RestMethod -OutFile ".\temp\LaunchBar_x64.exe" -Uri "https://www.lerup.com/php/download.php?LaunchBar/LaunchBar_x64.exe"
+    copy-item ".\temp\LaunchBar_x64.exe" -Destination "$WinPE_root\windows\system32\" -verbose
+
+    #freecommander
+    Invoke-RestMethod -OutFile ".\temp\doublecmd-1.0.5.x86_64-win64.zip" -uri "https://deac-fra.dl.sourceforge.net/project/doublecmd/DC for Windows 64 bit/Double Commander 1.0.5 beta/doublecmd-1.0.5.x86_64-win64.zip"
+    7z t ".\temp\doublecmd-1.0.5.x86_64-win64.zip"
+    if($LASTEXITCODE -eq 0){
+        7z x -y ".\temp\doublecmd-1.0.5.x86_64-win64.zip" -o"$WinPE_root\Program Files" 
+    }    
         }
+    }    
+    #utils
+    $json=@"
+{
+    "System32": [
+        "System32\\label.exe",
+        "System32\\logman.exe",
+        "System32\\runas.exe",
+        "System32\\sort.exe",
+        "System32\\tzutil.exe",
+        "System32\\Utilman.exe",
+        "System32\\clip.exe",
+        "System32\\eventcreate.exe",
+        "System32\\forfiles.exe",
+        "System32\\setx.exe",
+        "System32\\timeout.exe",
+        "System32\\waitfor.exe",
+        "System32\\where.exe",
+        "System32\\whoami.exe"
+        ]
     }
-    foreach($fi in $files) {
-            copy-item -path  "$fi" -destination "$WinPE_root\$fi" -verbose
+"@ | convertfrom-json
+    # $json.psobject.members.where({$_.MemberType -eq "NoteProperty"}).Name
+    foreach($j in $json.system32){
+        Copy-Item -path "$env:SystemRoot\$j" -Destination "$WinPE_root\windows\system32\" -verbose
     }
-    Set-Location $oldloc
+    #remote Desktop
+    # Copy-Item -path "$env:SystemRoot\system32\d3d10_1.dll" "$WinPE_root\windows\system32\"
+    # Copy-Item -path "$env:SystemRoot\system32\d3d10_1core.dll" "$WinPE_root\windows\system32\"
+    # Copy-Item -path "$env:SystemRoot\system32\dxgi.dll" "$WinPE_root\windows\system32\"
+    # Copy-Item -path "$env:SystemRoot\system32\msacm32.dll" "$WinPE_root\windows\system32\"
+    # Copy-Item -path "$env:SystemRoot\system32\mstsc.exe" "$WinPE_root\windows\system32\"
+    # Copy-Item -path "$env:SystemRoot\system32\mstscax.dll" "$WinPE_root\windows\system32\"
+    # Copy-Item -path "$env:SystemRoot\system32\msvbvm60.dll" "$WinPE_root\windows\system32\"
+    # Copy-Item -path "$env:SystemRoot\system32\msvfw32.dll" "$WinPE_root\windows\system32\"
+    # Copy-Item -path "$env:SystemRoot\system32\en-us\msacm32.dll.mui" "$WinPE_root\windows\system32\en-us\"
+    # Copy-Item -path "$env:SystemRoot\system32\en-us\mstsc.exe.mui" "$WinPE_root\windows\system32\en-us\"
+    # Copy-Item -path "$env:SystemRoot\system32\en-us\mstscax.dll.mui" "$WinPE_root\windows\system32\en-us\"
+    # Copy-Item -path "$env:SystemRoot\system32\en-us\msvfw32.dll.mui" "$WinPE_root\windows\system32\en-us\"
+
 }
 
 function Add-BootDrivers(){
