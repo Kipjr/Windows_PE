@@ -371,12 +371,12 @@ General notes
     "update *.wim in BCD" | write-host -foregroundcolor magenta
     $wimPath =  get-childitem -path $ISO_root\*.wim -Recurse | Select-Object -ExpandProperty FullName #find wim and get path
     $filePath = $wimpath.substring($ISO_root.length, ($wimpath.length - $ISO_root.length) ) #get relative path
-    
+    "filepath: $filePath" | write-host -ForegroundColor Cyan
     #bcdedit [/store <filename>] /set [{<id>}] <datatype> <value>
     
     $bcdPath1 = "$ISO_root\Boot\BCD" #Legacy
     #$bcdstring1 = $(Get-BcdEntry -Store $bcdPath1  -id default).elements.where({$_.name -eq "device"}).value  #win11 only module
-    $enumcommand1 = 'bcdedit --% /store `"'+$bcdPath1+'`" /enum `{default`}'
+    $enumcommand1 = "bcdedit /store $bcdPath1"
     $rawbcdstring1 = invoke-expression $enumcommand1 | select-string -pattern "^device\s*(?<device>.*)$"
     $bcdstring1 = $rawbcdstring1.Matches.Groups.where({$_.Name -eq "device"}).Value
     $bcdstring1 = $bcdstring1.Replace("\sources\boot.wim",$filePath)
@@ -385,7 +385,7 @@ General notes
 
     $bcdPath2 = "$ISO_root\EFI\Microsoft\Boot\BCD" #EFI
     #$bcdstring2 = $(Get-BcdEntry -Store $bcdPath2 -id default).elements.where({$_.name -eq "device"}).value  #win11 only module
-    $enumcommand2 = 'bcdedit --% /store `"'+$bcdPath2+'`" /enum `{default`}'
+    $enumcommand2 = "bcdedit /store $bcdPath2"
     $rawbcdstring2 =  invoke-expression $enumcommand2 | select-string -pattern '^device\s*(?<device>.*)$'
     $bcdstring2 = $rawbcdstring2.Matches.Groups.where({$_.Name -eq "device"}).Value
     $bcdstring2 = $bcdstring2.Replace("\sources\boot.wim",$filePath)
