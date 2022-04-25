@@ -275,11 +275,30 @@ Net, Disk, Chipset (Thunderbolt)
             continue
         }
     }
-    $infitem = get-childitem ".\source\Drivers" -Recurse  -Filter "*.inf" | where-object {$_.FullName -like "*$arch_short*" } | Select-Object -ExpandProperty FullName
-    foreach($i in $infitem){
-        "adding $i" | write-host -ForegroundColor cyan
-        Add-WindowsDriver -Path "$WinPE_root" -Driver "$i" -verbose
+
+function Add-Updates(){
+    <#
+    .SYNOPSIS
+    Add updates
+    
+    .NOTES
+    
+    #>
+    Write-Host "Injecting updates from .\source\Updates"
+    Get-ChildItem ".\source\Updates" | ForEach-Object { 
+        Add-WindowsPackage -Path $WinPE_root -PackagePath ".\source\Updates\$_" 
     }
+}
+
+function Invoke-WinPEcleanup() {
+<#
+.SYNOPSIS
+Clean stuff
+
+.NOTES
+General notes
+#>
+
 }
 
 Function get-HashOfContents() {
