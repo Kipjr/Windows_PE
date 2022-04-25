@@ -375,13 +375,19 @@ General notes
     #bcdedit [/store <filename>] /set [{<id>}] <datatype> <value>
     
     $bcdPath1 = "$ISO_root\Boot\BCD" #Legacy
-    $bcdstring1 = $(Get-BcdEntry -Store $bcdPath1  -id default).elements.where({$_.name -eq "device"}).value  #win11 only module
+    #$bcdstring1 = $(Get-BcdEntry -Store $bcdPath1  -id default).elements.where({$_.name -eq "device"}).value  #win11 only module
+    $enumcommand1 = 'bcdedit --% /store `"'+$bcdPath1+'`" /enum `{default`}'
+    $rawbcdstring1 = invoke-expression $enumcommand1 | select-string -pattern "^device\s*(?<device>.*)$"
+    bcdstring1 = $rawbcdstring1.Matches.Groups.where({$_.Name -eq "device"}).Value
     $bcdstring1 = $bcdstring1.Replace("\sources\boot.wim",$filePath)
     $commands1= @("device","osdevice") | foreach-object { "bcdedit --% /store `"$bcdpath1`" /set `{default`} $_ $bcdstring1" } #https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.2#the-stop-parsing-token
     $commands1 | foreach-object { invoke-expression $_ }
 
     $bcdPath2 = "$ISO_root\EFI\Microsoft\Boot\BCD" #EFI
-    $bcdstring2 = $(Get-BcdEntry -Store $bcdPath2 -id default).elements.where({$_.name -eq "device"}).value  #win11 only module
+    #$bcdstring2 = $(Get-BcdEntry -Store $bcdPath2 -id default).elements.where({$_.name -eq "device"}).value  #win11 only module
+    $enumcommand2 = 'bcdedit --% /store `"'+$bcdPath2+'`" /enum `{default`}'
+    $rawbcdstring2 =  invoke-expression $enumcommand2 | select-string -pattern '^device\s*(?<device>.*)$'
+    bcdstring2 = $rawbcdstring2.Matches.Groups.where({$_.Name -eq "device"}).Value
     $bcdstring2 = $bcdstring2.Replace("\sources\boot.wim",$filePath)
     $commands2= @("device","osdevice") | foreach-object { "bcdedit --% /store `"$bcdpath2`" /set `{default`} $_ $bcdstring2" } #https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.2#the-stop-parsing-token
     $commands2 | foreach-object { invoke-expression $_ }
