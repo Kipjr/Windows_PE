@@ -391,9 +391,12 @@ New-WinPE
 New-FolderStructure
 Mount-WinPE
 #Add-DefaultStartCommands
+Add-FilesToWinPE
 Add-AppsToWinPE
 Add-OptionalComponents
 Add-BootDrivers
+#Add-Updates
+#Invoke-WinPEcleanup
 #Get-HashOfContents
 Dismount-Image
 Add-FilesToIso
