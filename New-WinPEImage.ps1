@@ -50,6 +50,8 @@ outputfolder will contain:
         set-location $old_loc
         exit 1
     }
+    remove-item -path "$workingDirectory\WinPE_$arch\fwfiles\efisys.bin" #fix press key to boot from dvd
+    copy-item -path "$adkPATH\Deployment Tools\amd64\Oscdimg\efisys_noprompt.bin" -Destination "$workingDirectory\WinPE_$arch\fwfiles\efisys.bin"
 }
 
 function New-FolderStructure() {
