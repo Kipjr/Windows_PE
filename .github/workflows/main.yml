@@ -59,6 +59,11 @@ jobs:
       INPUT_BRANDING: ${{ github.event.inputs.branding }}
       INPUT_MDT: ${{ github.event.inputs.MDT }}
     steps:
+      - name: Print the input values to STDOUT
+        shell: pwsh
+        run: | 
+           "The tags are:`n`t${env:INPUT_MDT}`n`t${env:INPUT_BRANDING}`n`t${env:GITHUB_WORKSPACE}" | write-output
+           
       - name: Install Choco
         shell: pwsh
         run: |
@@ -71,10 +76,6 @@ jobs:
         run: choco install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Print the input values to STDOUT
-        shell: pwsh
-        run: | 
-           "The tags are:`n`t${env:INPUT_MDT}`n`t${env:INPUT_BRANDING}`n`t${env:GITHUB_WORKSPACE}" | write-output
            
       - name: Build the WinPE image (without MDT)
         shell: pwsh
