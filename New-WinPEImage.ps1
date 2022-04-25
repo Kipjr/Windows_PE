@@ -109,7 +109,33 @@ General notes
         }
     }
 }
-function Add-DefaultStartCommands(){
+# function Add-DefaultStartCommands(){
+# <#
+# .SYNOPSIS
+# Default Start commands, immediately after booting WinPe
+
+# .NOTES
+# General notes
+#  #>
+
+#     "Adding lines to winpeshl.ini" | write-host -ForegroundColor magenta
+#     "[LaunchApps]" | Out-File -FilePath .\temp\winpeshl.ini #write to local file
+#     foreach($p in $json.winpeshl_commands){
+#         "$p" | write-host -ForegroundColor cyan
+#         #run in order of appearance, and don’t start until the previous app has terminated.
+#         #[LaunchApps]
+#         "$p"  | Out-File -append -FilePath .\temp\winpeshl.ini
+#         #%SYSTEMROOT%\System32\bddrun.exe /bootstrap
+#     }
+#     #if($MDT -eq $true) { "%SYSTEMROOT%\System32\bddrun.exe, /bootstrap" | Out-File -append -FilePath .\temp\winpeshl.ini }
+#     if(test-path -path "$WinPE_root\windows\system32\winpeshl.ini") {
+#         rename-item "$WinPE_root\windows\system32\winpeshl.ini" "$WinPE_root\windows\system32\winpeshl.ini.old"
+#     }
+#     copy-item .\temp\winpeshl.ini "$WinPE_root\windows\system32\winpeshl.ini"
+# }
+
+
+function Add-FilesToWinPE() {
 <#
 .SYNOPSIS
 Default Start commands, immediately after booting WinPe
