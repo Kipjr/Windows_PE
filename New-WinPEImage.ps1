@@ -331,6 +331,11 @@ General notes
  
     "Unmounting boot.wim image" | write-host -foregroundcolor magenta
     Dismount-WindowsImage -Path "$WinPE_root" -Save
+    $endsize=get-item -path "$ISO_root\Deploy\Boot\boot.wim" | Select-Object -ExpandProperty length
+    #Export-WindowsImage -SourceImagePath "$ISO_root\Deploy\Boot\boot.wim"  -DestinationImagePath "$ISO_root\Deploy\Boot\boot.wim"  -SourceIndex 1 -Setbootable -compressionType max
+    #$optsize=get-item -path "$ISO_root\Deploy\Boot\boot.wim" | Select-Object -ExpandProperty length
+    "Size increase after modifying: $([float]($endsize / $global:orisize)) - $global:orisize-->$endsize" | write-host -foregroundcolor magenta
+    #"Size reduction after optimizing $([float]($optsize / $endsize)) - $endsize-->$optsize" | write-host -foregroundcolor magenta
 }
 
 Function Add-FilesToIso(){
