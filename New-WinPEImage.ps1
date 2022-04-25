@@ -1,8 +1,9 @@
 Param(
-    $branding = "all",
-    $mdt = $false,
-    $arch="amd64",
-    $workingDirectory=$env:GITHUB_WORKSPACE
+    [ValidateSet("all", "none", "hp","dell","lenovo","vmware")]$branding="vmware",    
+    [switch]$mdt,
+    [ValidateSet("amd64", "x86", "arm","arm64")]$arch="amd64",
+    [string]$workingDirectory=$env:GITHUB_WORKSPACE,
+    [string]$apps=$env:INPUT_APPS
 )
 #https://go.microsoft.com/fwlink/?linkid=2165884 #ADK
 #https://go.microsoft.com/fwlink/?linkid=2166133 #ADK Add-on WinPE
@@ -11,7 +12,11 @@ Param(
 
 
 $json=get-content -path .\env.json -raw | convertfrom-json
-if($arch -eq "amd64"){$arch_short="x64"} else {$arch_short=$arch}
+
+$mdt = $mdt.IsPresent
+$old_loc=$PWD
+
+if($arch -eq "amd64"){$arch_short="x64"} else {$arch_short=$arch} #amd64 to x64
 set-variable -name adkPATH      -value  "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit" -verbose
 set-variable -name WinPEPATH    -value  "$adkPATH\Windows Preinstallation Environment" -verbose 
 set-variable -name DeployImagingToolsENV -value "$adkPATH\Deployment Tools\DandISetEnv.bat" -verbose  #Deployment and Imaging Tools Environment
