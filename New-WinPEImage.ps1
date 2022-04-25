@@ -26,10 +26,11 @@ set-location $workingDirectory
 set-variable -name WinPE_root   -value  "$workingDirectory\WinPE_$arch\mount" -verbose 
 set-variable -name ISO_root     -value  "$workingDirectory\WinPE_$arch\media" -verbose
 
-New-Item -ItemType Directory -Path . -Name temp -force -verbose #folder for temporary files                                                                                   
-New-Item -ItemType Directory -Path . -Name source\Drivers\$branding -force  -verbose #folder for drivers of $Brand
-New-Item -ItemType Directory -Path . -Name source\_iso -force  -verbose #folder for drivers of $Brand
-New-Item -ItemType Directory -Path . -Name source\_winpe -force  -verbose #folder _winpe files
+if(!(test-path -path $workingDirectory)){new-item -itemtype directory -path $workingDirectory}   
+if(!(test-path -path $workingDirectory\source)){copy-item -Path .\source -destination $workingDirectory -recurse}
+set-location $workingDirectory
+New-Item -ItemType Directory -Path $workingDirectory -Name temp -force -verbose #folder for temporary files                                                                                   
+New-Item -ItemType Directory -Path $workingDirectory -Name source\Drivers\$branding -force  -verbose #folder for drivers of $Brand
 
 function New-WinPE() {
 <#
