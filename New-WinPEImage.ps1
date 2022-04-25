@@ -174,6 +174,12 @@ function Add-AppsToWinPE(){
 General notes
 #>
 
+    #7zip
+    invoke-restmethod -OutFile ".\temp\7z2107-x64.exe" -uri "https://www.7-zip.org/a/7z2107-x64.exe"
+    7z t ".\temp\7z2107-x64.exe"
+    if($LASTEXITCODE -eq 0){
+        7z x -y ".\temp\7z2107-x64.exe" -o"$WinPE_root\Program Files\7-Zip" 
+    }
     # Powershell 7.2.2
     invoke-restmethod -OutFile ".\temp\pwsh.ps1"  -Uri 'https://aka.ms/install-powershell.ps1'
     .\temp\pwsh.ps1  -Destination "$WinPE_root\Program Files\PowerShell\7"
@@ -188,7 +194,7 @@ General notes
     Invoke-RestMethod -OutFile ".\temp\LaunchBar_x64.exe" -Uri "https://www.lerup.com/php/download.php?LaunchBar/LaunchBar_x64.exe"
     copy-item ".\temp\LaunchBar_x64.exe" -Destination "$WinPE_root\windows\system32\" -verbose
 
-    #freecommander
+    #doublecmd
     Invoke-RestMethod -OutFile ".\temp\doublecmd-1.0.5.x86_64-win64.zip" -uri "https://deac-fra.dl.sourceforge.net/project/doublecmd/DC for Windows 64 bit/Double Commander 1.0.5 beta/doublecmd-1.0.5.x86_64-win64.zip"
     7z t ".\temp\doublecmd-1.0.5.x86_64-win64.zip"
     if($LASTEXITCODE -eq 0){
