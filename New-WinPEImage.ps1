@@ -251,8 +251,9 @@ Net, Disk, Chipset (Thunderbolt)
     "Adding drivers" | write-host -ForegroundColor magenta    
     foreach($b in $arr){
         "$b" | write-host -ForegroundColor cyan
-        if((test-path($b)) -and ($b -like ".\source\Drivers\*")){
-            #it's a file path and in .\source\Drivers\
+        if((test-path($b)) -and ($b -notlike ".\source\Drivers\$branding")){
+            #it's a file path and not in .\source\Drivers\$branding
+            Copy-Item -Path "$b" -Destination ".\source\Drivers\$branding" -Verbose
         }
         elseif($b -match 'https?://.*?\.(zip|rar|exe|7z|cab)') {
             #it's a web url
@@ -275,6 +276,11 @@ Net, Disk, Chipset (Thunderbolt)
             continue
         }
     }
+    "Injecting drivers from .\source\Drivers" | write-host -ForegroundColor cyan
+    Add-WindowsDriver -Path "$WinPE_root" -Driver ".\source\Drivers\$branding" -verbose -Recurse
+    
+}
+
 
 function Add-Updates(){
     <#
