@@ -52,6 +52,7 @@ outputfolder will contain:
     }
     remove-item -path "$workingDirectory\WinPE_$arch\fwfiles\efisys.bin" #fix press key to boot from dvd
     copy-item -path "$adkPATH\Deployment Tools\amd64\Oscdimg\efisys_noprompt.bin" -Destination "$workingDirectory\WinPE_$arch\fwfiles\efisys.bin"
+    $global:orisize=get-item -path "$ISO_root\sources\boot.wim" | Select-Object -ExpandProperty length
 }
 
 function New-FolderStructure() {
