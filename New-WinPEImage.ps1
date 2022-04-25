@@ -20,9 +20,6 @@ if($arch -eq "amd64"){$arch_short="x64"} else {$arch_short=$arch} #amd64 to x64
 set-variable -name adkPATH      -value  "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit" -verbose
 set-variable -name WinPEPATH    -value  "$adkPATH\Windows Preinstallation Environment" -verbose 
 set-variable -name DeployImagingToolsENV -value "$adkPATH\Deployment Tools\DandISetEnv.bat" -verbose  #Deployment and Imaging Tools Environment
-$old_loc=$PWD
-if(!(test-path -path $workingDirectory)){new-item -itemtype directory -path $workingDirectory}   
-set-location $workingDirectory
 set-variable -name WinPE_root   -value  "$workingDirectory\WinPE_$arch\mount" -verbose 
 set-variable -name ISO_root     -value  "$workingDirectory\WinPE_$arch\media" -verbose
 
@@ -197,8 +194,6 @@ General notes
     if($LASTEXITCODE -eq 0){
         7z x -y ".\temp\doublecmd-1.0.5.x86_64-win64.zip" -o"$WinPE_root\Program Files" 
     }    
-        }
-    }    
     #utils
     $json=@"
 {
@@ -368,7 +363,7 @@ General notes
 #>
 
     "update *.wim in BCD" | write-host -foregroundcolor magenta
-    $wimPath =  get-childitem -path $ISO_root\*.wim -Recurse | select -ExpandProperty FullName #find wim and get path
+    $wimPath =  get-childitem -path $ISO_root\*.wim -Recurse | Select-Object -ExpandProperty FullName #find wim and get path
     $filePath = $wimpath.substring($ISO_root.length, ($wimpath.length - $ISO_root.length) ) #get relative path
     
     #bcdedit [/store <filename>] /set [{<id>}] <datatype> <value>
