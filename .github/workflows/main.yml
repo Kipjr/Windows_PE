@@ -25,7 +25,8 @@ on:
         - all
         - hp 
         - dell 
-        - lenovo 
+        - lenovo
+        - vmware
       MDT:
         description: 'Include MDT'
         required: true 

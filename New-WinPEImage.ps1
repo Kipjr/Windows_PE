@@ -2,8 +2,7 @@ Param(
     [ValidateSet("all", "none", "hp","dell","lenovo","vmware")]$branding="vmware",    
     [switch]$mdt,
     [ValidateSet("amd64", "x86", "arm","arm64")]$arch="amd64",
-    [string]$workingDirectory=$env:GITHUB_WORKSPACE,
-    [string]$apps=$env:INPUT_APPS
+    [string]$workingDirectory=$env:GITHUB_WORKSPACE
 )
 #https://go.microsoft.com/fwlink/?linkid=2165884 #ADK
 #https://go.microsoft.com/fwlink/?linkid=2166133 #ADK Add-on WinPE
