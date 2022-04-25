@@ -138,28 +138,36 @@ General notes
 function Add-FilesToWinPE() {
 <#
 .SYNOPSIS
-Default Start commands, immediately after booting WinPe
+Add files & folders to WinPE (Boot.wim)
 
 .NOTES
-General notes
+only from .\source\_winpe where name does not contain .ignore
 #>
 
-    "Adding lines to winpeshl.ini" | write-host -ForegroundColor magenta
-    "[LaunchApps]" | Out-File -FilePath .\winpeshl.ini #write to local file
-    foreach($p in $json.winpeshl_commands){
-        "$p" | write-host -ForegroundColor cyan
-        #run in order of appearance, and don’t start until the previous app has terminated.
-        #[LaunchApps]
-        "$p"  | Out-File -append -FilePath .\winpeshl.ini
-        #%SYSTEMROOT%\System32\bddrun.exe /bootstrap
-    }
-    if($MDT -eq $true) { "%SYSTEMROOT%\System32\bddrun.exe, /bootstrap" | Out-File -append -FilePath .\winpeshl.ini }
-    if(test-path -path "$WinPE_root\windows\system32\winpeshl.ini") {
-        rename-item "$WinPE_root\windows\system32\winpeshl.ini" "$WinPE_root\windows\system32\winpeshl.ini.old"
-    }
-    copy-item ./winpeshl.ini "$WinPE_root\windows\system32\winpeshl.ini"
-}
+# replace the old background
+    takeown /f "$WinPE_root\Windows\system32\winpe.jpg"
+    icacls "$WinPE_root\Windows\system32\winpe.jpg" /grant everyone:f
+    Remove-Item "$WinPE_root\Windows\system32\winpe.jpg"
+    Copy-Item -Path "$workingdirectory\source\winpe.jpg" -Destination "$WinPE_root\Windows\system32\winpe.jpg" -Force
 
+
+#custom files:
+    "Adding Files & Folders to WinPE" | write-host -ForegroundColor magenta
+    $folders = get-childitem -directory -Path ".\source\_winpe" -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}  | select -ExpandProperty fullname
+    $files = get-childitem -file -Path ".\source\_winpe" -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}  | select -ExpandProperty fullname
+    
+    foreach($fo in $folders) {
+        $shortpath = $fo.Substring("$workingdirectory\source\_winpe".length + 1,$fo.length-"$workingdirectory\source\_winpe".length - 1) #get relative path
+        if(!(test-path -path "$WinPE_root\$shortpath")){
+            New-Item -ItemType Directory "$WinPE_root\$shortpath" -verbose
+        }
+    }
+    foreach($fi in $files) {
+            $shortpath = $fi.Substring("$workingdirectory\source\_winpe".length + 1,$fi.length-"$workingdirectory\source\_winpe".length - 1) #get relative path
+            copy-item -path  "$fi" -destination "$WinPE_root\$shortpath" -verbose
+    }
+
+}
 
 function Add-AppsToWinPE(){
 <#
