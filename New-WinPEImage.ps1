@@ -173,7 +173,18 @@ function Add-AppsToWinPE(){
 .NOTES
 General notes
 #>
-
+    
+	#DeploymentMonitoringTool.exe (no download, direct included)
+	#CMTrace.exe (no download, direct included)
+	
+	#process explorer
+    invoke-restmethod -OutFile ".\temp\ProcessExplorer.zip" -uri "https://download.sysinternals.com/files/ProcessExplorer.zip"
+    7z t ".\temp\ProcessExplorer.zip"
+    if($LASTEXITCODE -eq 0){
+        7z x -y ".\temp\ProcessExplorer.zip" -o".\temp" 
+        copy-item -path ".\temp\procexp64.exe" -Destination "$WinPE_root\windows\system32\" -verbose
+    }
+	
     #7zip
     invoke-restmethod -OutFile ".\temp\7z2107-x64.exe" -uri "https://www.7-zip.org/a/7z2107-x64.exe"
     7z t ".\temp\7z2107-x64.exe"
