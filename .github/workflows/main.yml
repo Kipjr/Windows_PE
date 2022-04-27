@@ -63,12 +63,12 @@ jobs:
       - name: Sets env var branding if empty
         run: |
           echo "INPUT_BRANDING=all" >> $GITHUB_ENV
-        if: ${{ github.event.inputs.branding == '' }}
+        if: ${{ github.event.inputs.branding == ${{ null }} }}
 
       - name: Print the input values to STDOUT
         shell: pwsh
         run: | 
-           "The tags are:`n`t${env:INPUT_MDT}`n`t${env:INPUT_BRANDING}`n`t${env:GITHUB_WORKSPACE}" | write-output
+           "The tags are:`n`tMDT: ${env:INPUT_MDT}`n`tBRANDING: ${env:INPUT_BRANDING} `n`tWorkspace: ${env:GITHUB_WORKSPACE}" | write-output
            
       - name: Install Choco
         shell: pwsh
