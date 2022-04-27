@@ -59,11 +59,13 @@ generate folderstructure
 
 .NOTES
     Boot
+
     Deploy\Boot\{boot.wim -> LiteTouchPE_x64.wim} 
     EFI
     bootmgr
     bootmgr.efi    
 #>
+
     get-childitem -Path $ISO_root\* -exclude @("bootmgr","bootmgr.efi","sources","Boot","EFI") -Depth 0 | remove-item -recurse #cleanup
     foreach($f in @("Tools","Templates","Servicing","Scripts","Packages","Out-of-Box Drivers","Operating Systems","Control","Captures","Boot","Backup","Applications","`$OEM`$")){
         New-Item -ItemType Directory -path  "$ISO_root\Deploy" -name "$f"
@@ -75,7 +77,9 @@ generate folderstructure
 function Mount-WinPE() {
 <#
 .SYNOPSIS
+
 mount boot.wim to WinPE_$arch\mount
+
 
 .NOTES
 General notes
@@ -83,7 +87,7 @@ General notes
     "Mounting boot.wim image" | write-host -foregroundcolor magenta
     Mount-WindowsImage -ImagePath "$ISO_root\Deploy\Boot\boot.wim" -index 1  -Path "$WinPE_root"
     cmd /c "Dism /Set-ScratchSpace:512 /Image:""$WinPE_root"""
-    
+
 }
 
  Function Add-OptionalComponents() {
@@ -98,6 +102,7 @@ General notes
     "Adding Optional Components to boot.wim" | write-host -foregroundcolor magenta
     foreach($c in $json.WinPEOptionalComponents){
         "Adding: $c" | write-host -foregroundcolor cyan
+
         Add-WindowsPackage -Path "$WinPE_root" -PackagePath "$WinPEPATH\$arch\WinPE_OCs\$c.cab" -PreventPending
         if(test-path -path "$WinPEPATH\$arch\WinPE_OCs\en-us\$c`_en-us.cab" ){
             Add-WindowsPackage -Path "$WinPE_root" -PackagePath "$WinPEPATH\$arch\WinPE_OCs\en-us\$c`_en-us.cab" -PreventPending
@@ -106,6 +111,7 @@ General notes
         }
     }
 }
+
 # function Add-DefaultStartCommands(){
 # <#
 # .SYNOPSIS
@@ -250,6 +256,7 @@ General notes
     # Copy-Item -path "$env:SystemRoot\system32\en-us\mstscax.dll.mui" "$WinPE_root\windows\system32\en-us\"
     # Copy-Item -path "$env:SystemRoot\system32\en-us\msvfw32.dll.mui" "$WinPE_root\windows\system32\en-us\"
 
+
 }
 
 function Add-BootDrivers(){
@@ -271,6 +278,7 @@ Net, Disk, Chipset (Thunderbolt)
     "Adding drivers" | write-host -ForegroundColor magenta    
     foreach($b in $arr){
         "$b" | write-host -ForegroundColor cyan
+
         if((test-path($b)) -and ($b -notlike ".\source\Drivers\$branding")){
             #it's a file path and not in .\source\Drivers\$branding
             Copy-Item -Path "$b" -Destination ".\source\Drivers\$branding" -Verbose
@@ -296,6 +304,7 @@ Net, Disk, Chipset (Thunderbolt)
             continue
         }
     }
+
     "Injecting drivers from .\source\Drivers" | write-host -ForegroundColor cyan
     Add-WindowsDriver -Path "$WinPE_root" -Driver ".\source\Drivers\$branding" -verbose -Recurse
     
@@ -339,6 +348,7 @@ General notes
     "Generating hash of contents boot.wim " | write-host -foregroundcolor magenta #issue with access denied
     get-childitem "$WinPE_root" -Recurse -File | select @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist_boot.wim.csv -Delimiter ";"
 }
+
 
 Function Dismount-Image(){
 <#

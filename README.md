@@ -19,11 +19,14 @@ flowchart TB
     RE[Run Setup.exe]
     RW[Read winpeshl.ini]
     AP{Winpeshl.ini exist and has valid content?}
+
     A1[Run App1.exe with parameter /parameter1]
+
 
     MD{MDT is included?}
     RS[Run <br>cmd /k %SYSTEMROOT\system32\startnet.cmd]
     SN[Startnet.cmd: <br>wpeinit.exe]
+
     RA[Run applications as specified in winpeshl.ini<br><br><i>Run app in order of appearance <br>Starts when the previous app has terminated.</i>]
 
     UE{Unattend.xml exist?}
@@ -82,6 +85,7 @@ subgraph WinPE
     SE ==> |no | RW
     RW ==> AP
     AP ==> |yes| RA
+
     MD ==> |yes| BD
     MD ==> |no| Error
     RA ==>| %SYSTEMDRIVE%\Apps\App1.exe, /parameter1 | A1
@@ -93,6 +97,7 @@ subgraph WinPE
 subgraph cmd [cmd.exe]
     RS ==> SN
 end
+
     
 subgraph MDT [MDT]
     SN -.-> WI
