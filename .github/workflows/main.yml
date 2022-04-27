@@ -59,6 +59,7 @@ jobs:
       INPUT_BRANDING: ${{ github.event.inputs.branding }}
       INPUT_MDT: ${{ github.event.inputs.MDT }}
     steps:
+
       - name: Sets env var branding if empty
         run: |
           echo "INPUT_BRANDING=all" >> $GITHUB_ENV
