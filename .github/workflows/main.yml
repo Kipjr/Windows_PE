@@ -25,7 +25,8 @@ on:
         - all
         - hp 
         - dell 
-        - lenovo 
+        - lenovo
+        - vmware
       MDT:
         description: 'Include MDT'
         required: true 
@@ -54,7 +55,15 @@ jobs:
   build:
     runs-on: windows-latest
     # needs: test
+    env:
+      INPUT_BRANDING: ${{ github.event.inputs.branding }}
+      INPUT_MDT: ${{ github.event.inputs.MDT }}
     steps:
+      - name: Print the input values to STDOUT
+        shell: pwsh
+        run: | 
+           "The tags are:`n`t${env:INPUT_MDT}`n`t${env:INPUT_BRANDING}`n`t${env:GITHUB_WORKSPACE}" | write-output
+           
       - name: Install Choco
         shell: pwsh
         run: |
@@ -67,9 +76,17 @@ jobs:
         run: choco install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Build the WinPE image
+           
+      - name: Build the WinPE image (without MDT)
         shell: pwsh
-        run: .\New-WinPEImage.ps1 -branding $env:INPUT_BRANDING -mdt $env:INPUT_MDT -arch "x64" -workingDirectory $env:GITHUB_WORKSPACE
+        if: ${{ github.event.inputs.MDT == 'false' }}
+        run: .\New-WinPEImage.ps1 -branding $env:INPUT_BRANDING -arch "amd64" -workingDirectory $env:GITHUB_WORKSPACE
+        
+      - name: Build the WinPE image (with MDT)
+        shell: pwsh
+        if: ${{ github.event.inputs.MDT == 'true' }}
+        run: .\New-WinPEImage.ps1 -branding $env:INPUT_BRANDING -mdt -arch "amd64" -workingDirectory $env:GITHUB_WORKSPACE        
+        
       - name: Generate filelist
         shell: pwsh
         run: |

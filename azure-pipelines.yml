@@ -1,0 +1,125 @@
+# This workflow will build winpe
+# 
+name: Create WinPE_amd64.iso_$(Date:yyyyMMdd)$(Rev:.r)'
+# Controls when the workflow will run
+#on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  # push:
+  #   branches: [ master ]
+  # pull_request:
+  #  branches: [ master ]
+
+pr: none 
+trigger: none 
+
+parameters:
+- name: branding
+  displayName: 'Include drivers'
+  type: string
+  default: 'all'
+  values:
+  - none
+  - all
+  - hp 
+  - dell 
+  - lenovo
+  - vmware
+- name: MDT
+  displayName: 'Include MDT'
+  type: boolean
+  default: false
+
+variables:
+  location: "West Europe"
+  vmImageName: "windows-latest"
+  BRANDING:  ${{ parameters.branding }}
+  MDT:  ${{ parameters.mdt }}
+
+pool:
+  vmImage: $(vmImageName)
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      branding:
+        description: 'Include drivers'
+        required: true
+        default: 'all' 
+        type: choice
+        options:
+        - none
+        - all
+        - hp 
+        - dell 
+        - lenovo 
+      MDT:
+        description: 'Include MDT'
+        required: true 
+        type: boolean 
+
+steps:
+  - task: PowerShell@2
+    displayName: Print the input values to STDOUT
+    inputs:
+      pwsh: true
+      targetType: 'inline'
+      script: | 
+           "The tags are:`n`t${env:MDT}`n`t${env:BRANDING}`n`t$(System.DefaultWorkingDirectory)" | write-output
+    
+  - task: PowerShell@2
+    displayName: Install Choco
+    inputs:
+      pwsh: true
+      targetType: 'inline'
+      script: |
+        if(test-path -path "$env:ALLUSERSPROFILE\chocolatey\choco.exe"){Write-Output "Choco is already installed"} else {
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+          Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        }
+
+  - task: PowerShell@2
+    displayName: Install ADK
+    inputs:
+      pwsh: true
+      targetType: 'inline'
+      script: |
+        choco install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
+
+  - checkout: self
+    persistCredentials: true
+
+  - task: PowerShell@2
+    displayName: Build the WinPE image (without MDT)
+    condition: eq(${{ parameters.mdt }}, 'false')
+    inputs:
+      pwsh: true
+      filePath: $(System.DefaultWorkingDirectory)\New-WinPEImage.ps1 -branding $env:BRANDING -mdt -arch "x64" -workingDirectory $(System.DefaultWorkingDirectory)
+
+  - task: PowerShell@2
+    displayName: Build the WinPE image (with MDT)
+    condition: eq(${{ parameters.mdt }}, 'true')
+    inputs:
+      pwsh: true
+      filePath: $(System.DefaultWorkingDirectory)\New-WinPEImage.ps1 -branding $env:BRANDING -arch "x64" -workingDirectory $(System.DefaultWorkingDirectory)
+
+  - task: PowerShell@2
+    displayName: Generate filelist
+    inputs:
+      pwsh: true
+      targetType: 'inline'
+      script: |
+        get-childitem . -Recurse -File | select @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist.csv -Delimiter ";"
+
+  - task: CopyFiles@2
+    displayName: Copy files to artifact staging directory
+    inputs:
+      Contents: |
+        WinPE_amd64.iso
+        filelist.csv
+      TargetFolder: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Build Artifact
+    inputs:
+      PathtoPublish: $(Build.ArtifactStagingDirectory)
+      ArtifactName: 'WinPE_amd64'
+      publishLocation: 'Container'
