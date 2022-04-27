@@ -63,7 +63,7 @@ jobs:
       - name: Sets env var branding if empty
         run: |
           echo "INPUT_BRANDING=all" >> $GITHUB_ENV
-        if: ${{ github.event.inputs.branding == ${{ null }} }}
+        if: ${{ github.event.inputs.branding ==  null }}
 
       - name: Print the input values to STDOUT
         shell: pwsh
