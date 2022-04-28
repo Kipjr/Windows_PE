@@ -1,6 +1,6 @@
 Param(
-    [ValidateSet("all", "none", "hp","dell","lenovo","vmware")]$branding="vmware",    
-    [switch]$mdt,
+    [ValidateSet("all", "none", "hp","dell","lenovo","vmware")]$branding="all",    
+    [boolean]$mdt=$false,
     [ValidateSet("amd64", "x86", "arm","arm64")]$arch="amd64",
     [string]$workingDirectory=$env:GITHUB_WORKSPACE
 )
@@ -12,7 +12,6 @@ Param(
 
 $json=get-content -path .\env.json -raw | convertfrom-json
 
-$mdt = $mdt.IsPresent
 $old_loc=$PWD
 
 if($arch -eq "amd64"){$arch_short="x64"} else {$arch_short=$arch} #amd64 to x64
