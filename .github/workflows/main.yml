@@ -33,9 +33,12 @@ on:
         required: true
         type: boolean
 
+env:
+  INPUT_BRANDING: ${{ github.event.inputs.branding }}
+  INPUT_MDT: ${{ github.event.inputs.MDT }}
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-
   check:
     runs-on: ubuntu-latest
     steps:
