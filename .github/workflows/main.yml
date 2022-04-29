@@ -76,9 +76,6 @@ jobs:
   build:
     runs-on: windows-latest
     needs: check
-    env:
-      INPUT_BRANDING
-      INPUT_MDT
     steps:
 
       - name: Print the input values to STDOUT
