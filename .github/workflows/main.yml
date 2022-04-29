@@ -93,7 +93,7 @@ jobs:
 
       - name: Build the WinPE image
         shell: pwsh
-        run: .\New-WinPEImage.ps1 -branding $env:INPUT_BRANDING -mdt $env:INPUT_MDT -arch "amd64" -workingDirectory $env:GITHUB_WORKSPACE
+        run: .\New-WinPEImage.ps1 -branding $env:INPUT_BRANDING -mdt $($env:INPUT_MDT -eq '1') -arch "amd64" -workingDirectory $env:GITHUB_WORKSPACE
 
       - name: Generate filelist
         shell: pwsh
