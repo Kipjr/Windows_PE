@@ -1,5 +1,5 @@
 # This workflow will build winpe then publish a package to GitHub Packages when a release is created
-# 
+#
 name: Create WinPE_amd64.iso
 # Controls when the workflow will run
 #on:
@@ -13,27 +13,48 @@ on:
     types: [created]
 
   # Allows you to run this workflow manually from the Actions tab
+  # If a default parameter is not set, the default value of the input is false for a boolean, 0 for a number, and "" for a string.
   workflow_dispatch:
     inputs:
       branding:
         description: 'Include drivers'
         required: true
-        default: 'all' 
+        default: 'all'
         type: choice
         options:
         - none
         - all
-        - hp 
-        - dell 
+        - hp
+        - dell
         - lenovo
         - vmware
       MDT:
         description: 'Include MDT'
-        required: true 
-        type: boolean 
+        required: true
+        type: boolean
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set if input_branding is empty
+        shell: pwsh
+        if: "${{ github.event.inputs.branding != '' }}"
+        run: |
+          echo ("INPUT_BRANDING='all'") >> $env:GITHUB_ENV
+
+      - name: Set env if input_MDT is empty
+        shell: pwsh
+        if: ${{ github.event.inputs.MDT == 'false' }}
+        run: |
+          echo ("INPUT_MDT='false'") >> $env:GITHUB_ENV
+
+      - name: Print the input values to STDOUT
+        shell: pwsh
+        run: |
+          "The tags are:`n`tMDT: ${env:INPUT_MDT}`n`tBRANDING: ${env:INPUT_BRANDING} `n`tWorkspace: ${env:GITHUB_WORKSPACE}" | write-output
   # test:
     # name: PSScriptAnalyzer
     # runs-on: ubuntu-latest
@@ -43,7 +64,7 @@ jobs:
         # uses: microsoft/psscriptanalyzer-action@v1.0
         # with:
           # path: .\
-          # recurse: true 
+          # recurse: true
           # includeRule: '"PSAvoidGlobalAliases", "PSAvoidUsingConvertToSecureStringWithPlainText"'
           # output: results.sarif
       # - name: Upload SARIF results file
@@ -54,17 +75,17 @@ jobs:
 
   build:
     runs-on: windows-latest
-    # needs: test
+    needs: check
     env:
-      INPUT_BRANDING: ${{ github.event.inputs.branding }}
-      INPUT_MDT: ${{ github.event.inputs.MDT }}
+      INPUT_BRANDING: ${{env.INPUT_BRANDING}}
+      INPUT_MDT: ${{env.INPUT_MDT}}
     steps:
 
       - name: Print the input values to STDOUT
         shell: pwsh
-        run: | 
+        run: |
           "The tags are:`n`tMDT: ${env:INPUT_MDT}`n`tBRANDING: ${env:INPUT_BRANDING} `n`tWorkspace: ${env:GITHUB_WORKSPACE}" | write-output
-          
+
       - name: Install Choco
         shell: pwsh
         run: |
@@ -80,8 +101,8 @@ jobs:
 
       - name: Build the WinPE image
         shell: pwsh
-        run: .\New-WinPEImage.ps1 -branding $env:INPUT_BRANDING -mdt $env:INPUT_MDT -arch "amd64" -workingDirectory $env:GITHUB_WORKSPACE        
-        
+        run: .\New-WinPEImage.ps1 -branding $env:INPUT_BRANDING -mdt $env:INPUT_MDT -arch "amd64" -workingDirectory $env:GITHUB_WORKSPACE
+
       - name: Generate filelist
         shell: pwsh
         run: |
