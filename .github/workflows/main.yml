@@ -77,8 +77,8 @@ jobs:
     runs-on: windows-latest
     needs: check
     env:
-      INPUT_BRANDING: ${{env.INPUT_BRANDING}}
-      INPUT_MDT: ${{env.INPUT_MDT}}
+      INPUT_BRANDING
+      INPUT_MDT
     steps:
 
       - name: Print the input values to STDOUT
