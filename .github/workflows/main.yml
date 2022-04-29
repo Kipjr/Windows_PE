@@ -33,26 +33,11 @@ on:
         required: true
         type: boolean
 
-env:
-  INPUT_BRANDING: ${{ github.event.inputs.branding }}
-  INPUT_MDT: ${{ github.event.inputs.MDT }}
+
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set if github.event.inputs.branding  is empty
-        shell: bash	
-        if: "${{ github.event.inputs.branding == null }}"
-        run: |
-          echo "INPUT_BRANDING='all'" >>  $GITHUB_ENV
 
-      - name: Set env if github.event.inputs.mdt is empty
-        shell: bash	
-        if: ${{ github.event.inputs.MDT == null }}
-        run: |
-          echo "INPUT_MDT='false'" >>  $GITHUB_ENV
   # test:
     # name: PSScriptAnalyzer
     # runs-on: ubuntu-latest
@@ -72,10 +57,24 @@ jobs:
 
 
   build:
+    env:
+      INPUT_BRANDING: ${{ github.event.inputs.branding }}
+      INPUT_MDT: ${{ github.event.inputs.MDT }}
     runs-on: windows-latest
     needs: check
     steps:
-
+      - name: Set if github.event.inputs.branding  is empty
+        shell: bash	
+        if: "${{ github.event.inputs.branding == null }}"
+        run: |
+          echo "INPUT_BRANDING='all'" >>  $GITHUB_ENV
+          
+      - name: Set env if github.event.inputs.mdt is empty
+        shell: bash	
+        if: ${{ github.event.inputs.MDT == null }}
+        run: |
+          echo "INPUT_MDT='false'" >>  $GITHUB_ENV
+          
       - name: Print the input values to STDOUT
         shell: pwsh
         run: |
