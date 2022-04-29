@@ -43,16 +43,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set if github.event.inputs.branding  is empty
-        shell: pwsh
+        shell: bash	
         if: "${{ github.event.inputs.branding == null }}"
         run: |
-          echo ("INPUT_BRANDING='all'") >>  $GITHUB_ENV
+          echo "INPUT_BRANDING='all'" >>  $GITHUB_ENV
 
       - name: Set env if github.event.inputs.mdt is empty
-        shell: pwsh
+        shell: bash	
         if: ${{ github.event.inputs.MDT == null }}
         run: |
-          echo ("INPUT_MDT='false'") >>  $GITHUB_ENV
+          echo "INPUT_MDT='false'" >>  $GITHUB_ENV
   # test:
     # name: PSScriptAnalyzer
     # runs-on: ubuntu-latest
