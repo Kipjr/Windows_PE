@@ -39,22 +39,23 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Set if input_branding is empty
+      - name: Print the input values to STDOUT
+        shell: pwsh
+        run: |
+          MDT: ${{ toJSON(github.event.inputs.MDT) }}
+          BRANDING:  ${{ toJSON(github.event.inputs.branding) }}
+
+      - name: Set if github.event.inputs.branding  is empty
         shell: pwsh
         if: "${{ github.event.inputs.branding != '' }}"
         run: |
           echo ("INPUT_BRANDING='all'") >> $env:GITHUB_ENV
 
-      - name: Set env if input_MDT is empty
+      - name: Set env if github.event.inputs.mdt is empty
         shell: pwsh
-        if: ${{ github.event.inputs.MDT == 'false' }}
+        if: ${{ github.event.inputs.MDT == false }}
         run: |
           echo ("INPUT_MDT='false'") >> $env:GITHUB_ENV
-
-      - name: Print the input values to STDOUT
-        shell: pwsh
-        run: |
-          "The tags are:`n`tMDT: ${env:INPUT_MDT}`n`tBRANDING: ${env:INPUT_BRANDING} `n`tWorkspace: ${env:GITHUB_WORKSPACE}" | write-output
   # test:
     # name: PSScriptAnalyzer
     # runs-on: ubuntu-latest
