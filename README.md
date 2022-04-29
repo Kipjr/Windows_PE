@@ -6,6 +6,9 @@ Automatic build &amp; customization of WinPE
 
 Full Windows UEFI Boot schematic of Windows PE
 
+![image](https://user-images.githubusercontent.com/12066560/165970164-51bd4f18-9192-4082-a866-2cdbacbd5caa.png)
+
+
 
 ```mermaid
 
