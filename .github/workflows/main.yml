@@ -61,19 +61,17 @@ jobs:
       INPUT_BRANDING: ${{ github.event.inputs.branding }}
       INPUT_MDT: ${{ github.event.inputs.MDT }}
     runs-on: windows-latest
-    needs: check
     steps:
       - name: Set if github.event.inputs.branding  is empty
-        shell: bash	
+        shell: pwsh	
         if: "${{ github.event.inputs.branding == null }}"
         run: |
-          echo "INPUT_BRANDING='all'" >>  $GITHUB_ENV
-          
+          echo "INPUT_BRANDING='all'" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
       - name: Set env if github.event.inputs.mdt is empty
         shell: bash	
         if: ${{ github.event.inputs.MDT == null }}
         run: |
-          echo "INPUT_MDT='false'" >>  $GITHUB_ENV
+          echo "INPUT_MDT='false'" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
           
       - name: Print the input values to STDOUT
         shell: pwsh
