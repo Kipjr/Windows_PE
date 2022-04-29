@@ -39,21 +39,15 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Print the input values to STDOUT
-        shell: pwsh
-        run: |
-          MDT: ${{ toJSON(github.event.inputs.MDT) }}
-          BRANDING:  ${{ toJSON(github.event.inputs.branding) }}
-
       - name: Set if github.event.inputs.branding  is empty
         shell: pwsh
-        if: "${{ github.event.inputs.branding != '' }}"
+        if: "${{ github.event.inputs.branding == null }}"
         run: |
           echo ("INPUT_BRANDING='all'") >> $env:GITHUB_ENV
 
       - name: Set env if github.event.inputs.mdt is empty
         shell: pwsh
-        if: ${{ github.event.inputs.MDT == false }}
+        if: ${{ github.event.inputs.MDT == null }}
         run: |
           echo ("INPUT_MDT='false'") >> $env:GITHUB_ENV
   # test:
