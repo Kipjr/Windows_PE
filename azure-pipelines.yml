@@ -85,22 +85,25 @@ steps:
         choco install windows-adk-all  -y # https://go.microsoft.com/fwlink/?linkid=2165884
 
   - checkout: self
-    persistCredentials: true
+    persistCredentials: "true"
 
   - task: PowerShell@2
     displayName: Build the WinPE image (without MDT)
-    condition: eq(${{ parameters.mdt }}, 'false')
+
+    condition: eq(${{ parameters.mdt }}, False)
     inputs:
       pwsh: true
-      filePath: $(System.DefaultWorkingDirectory)\New-WinPEImage.ps1 -branding $env:BRANDING -mdt -arch "x64" -workingDirectory $(System.DefaultWorkingDirectory)
+      filePath: $(System.DefaultWorkingDirectory)\New-WinPEImage.ps1
+      arguments: "-branding $env:BRANDING -arch amd64 -workingDirectory $(System.DefaultWorkingDirectory)"
 
   - task: PowerShell@2
     displayName: Build the WinPE image (with MDT)
-    condition: eq(${{ parameters.mdt }}, 'true')
+    condition: eq(${{ parameters.mdt }}, True)
     inputs:
       pwsh: true
-      filePath: $(System.DefaultWorkingDirectory)\New-WinPEImage.ps1 -branding $env:BRANDING -arch "x64" -workingDirectory $(System.DefaultWorkingDirectory)
-
+      filePath: $(System.DefaultWorkingDirectory)\New-WinPEImage.ps1
+      arguments: "-branding $env:BRANDING -mdt $true -arch amd64 -workingDirectory $(System.DefaultWorkingDirectory)"
+      
   - task: PowerShell@2
     displayName: Generate filelist
     inputs:
