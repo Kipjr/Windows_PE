@@ -157,6 +157,7 @@ _Screenshot after <15sec boot:_
 ## Documentation
 
 - [WinPE Optional Components](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-add-packages--optional-components-reference?view=windows-11)
+- [MDT Flowchart](https://docs.microsoft.com/en-us/troubleshoot/mem/configmgr/troubleshooting-reference#LTIDeploymentProcessFlowcharts)
 
 
 ## Full Windows UEFI Boot schematic of Windows PE
