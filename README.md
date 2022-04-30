@@ -1,14 +1,162 @@
-[![Build & Publish](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml)
 # Windows_PE
+[![Create WinPE_amd64.iso](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml/badge.svg)](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml)
+
 Automatic build &amp; customization of WinPE
+
+
+- [Windows_PE](#windows_pe)
+  * [Basic](#basic)
+  * [Customization](#customization)
+    + [Drivers](#drivers)
+    + [Files](#files)
+    + [Enabled components](#enabled-components)
+    + [Inactive Components](#inactive-components)
+  * [Documentation](#documentation)
+    + [Full Windows UEFI Boot schematic of Windows PE](#full-windows-uefi-boot-schematic-of-windows-pe)
 
 ## Basic
 
-Full Windows UEFI Boot schematic of Windows PE
+- New-WinPE
+- New-FolderStructure
+  - _change bloated structure to MDT-based structure_
+    -  Remove root language folders and sources
+    -  Add MDT-structure and move `boot.wim` to `Deploy\Boot`
+- Mount-WinPE
+- Add-FilesToWinPE
+  - _Loop over contents `source\_winpe`_
+- Add-AppsToWinPE
+  - _Download applications (portable) and installs to target path_
+- Add-OptionalComponents
+- Add-BootDrivers
+  - _none, all, hp, dell, lenovo, vmware_
+  - _Release will contain 'all'_
+- Add-Updates
+  - `Disabled`
+- Invoke-WinPEcleanup
+  -  `Disabled`
+- Get-HashOfContents
+  -  `Disabled` due to permsssion issue in boot.wim system files
+- Dismount-Image
+- Add-FilesToIso
+  - _Loop over contents `source\_iso`_
+- Set-BCDData
+  - _Required due to folder structure change_
+- New-ISO
+
+_Screenshot after <15sec boot:_
 
 ![image](https://user-images.githubusercontent.com/12066560/165970164-51bd4f18-9192-4082-a866-2cdbacbd5caa.png)
 
 
+
+
+
+
+## Customization
+### Basic commands
+- Mount <br>`Mount-WindowsImage -ImagePath "$ISO_root\Deploy\Boot\boot.wim" -index 1  -Path "$WinPE_root"`
+- Unmount <br> `Dismount-WindowsImage -Path "$WinPE_root" -Save`
+- ToISO <br> `makeWinPEMedia.cmd /ISO $workingDirectory\WinPE_$arch workingDirectory\WinPE_$arch.iso`
+
+### Drivers
+- `Add-WindowsDriver -Path "$WinPE_root" -Driver ".\source\Drivers\$branding" -verbose -Recurse"`
+
+### Applications
+
+- Launchbar 
+  - Quicklaunch for apps
+- DeploymentMonitoringTool.exe (included in source)
+  - Get info about current machine
+- CMTrace_amd64.exe (included in source)
+  - Read MDT and other logs
+- Process Explorer
+- 7-Zip
+- Powershell 7.2.2+
+- Notepad++
+- DoubleCMD
+  - File Explorer as Explorer.exe is unavailable 
+- Missing executables and added:
+  - label
+  - logman
+  - runas
+  - sort
+  - tzutil
+  - Utilman
+  - clip
+  - eventcreate
+  - forfiles
+  - setx
+  - timeout
+  - waitfor
+  - where
+  - whoami.exe
+
+### Files
+- WinPE (X:\)
+  - Add to `$workingDirectory\WinPE_$arch\mount` folder.
+  - Included files in `source\_winpe\Windows\System32` to be added to `$workingDirectory\WinPE_$arch\mount\Windows\System32`
+    - CMTrace_amd64.exe
+    - DeploymentMonitoringTool.exe
+    - LaunchBar_x64.exe
+    - launchbar.ini
+    - test.bat
+    - winpeshl.ini 
+- ISO
+  - Add to `"$workingDirectory\WinPE_$arch\media"` folder
+
+
+### Enabled components
+<details>
+  <summary>Click to show</summary>
+    
+- WinPE-HTA
+- WinPE-WMI
+- WinPE-NetFX
+- WinPE-Scripting
+- WinPE-SecureStartup
+- WinPE-PlatformID
+- WinPE-PowerShell
+- WinPE-DismCmdlets
+- WinPE-SecureBootCmdlets
+- WinPE-StorageWMI
+- WinPE-EnhancedStorage
+- WinPE-Dot3Svc
+- WinPE-FMAPI
+- WinPE-FontSupport-WinRE
+- WinPE-PlatformId
+- WinPE-WDS-Tools
+- WinPE-WinReCfg
+</details>
+    
+#### Inactive Components
+<details>
+  <summary>Click to show</summary>
+    
+- WinPE-Fonts-Legacy
+- WinPE-Font Support-JA-JP
+- WinPE-Font Support-KO-KR
+- WinPE-Font Support-ZH-CN
+- WinPE-Font Support-ZH-HK
+- WinPE-GamingPeripherals
+- Winpe-LegacySetup
+- WinPE-MDAC
+- WinPE-PPPoE
+- WinPE-Rejuv
+- WinPE-RNDIS
+- WinPE-Setup
+- WinPE-Setup-Client
+- WinPE-Setup-Server
+- WinPE-SRT
+- WinPE-WiFi-Package
+</details>
+
+
+## Documentation
+
+- [WinPE Optional Components](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-add-packages--optional-components-reference?view=windows-11)
+
+
+## Full Windows UEFI Boot schematic of Windows PE
 
 ```mermaid
 
@@ -122,59 +270,4 @@ end
 UX -...- |ERROR| cmd
 
 ```
-
-
-## Customization
-- Mount <br>`Dism /Mount-Image /ImageFile:"C:\WinPE_amd64\media\sources\boot.wim" /index:1 /MountDir:"C:\WinPE_amd64\mount"`
-- Unmount <br> `Dism /Unmount-Image /MountDir:"C:\WinPE_amd64\mount" /commit`
-- ToISO <br> `MakeWinPEMedia /ISO C:\WinPE_amd64 C:\WinPE_amd64\WinPE_amd64.iso`
-
-### Drivers
-- `Dism /Add-Driver /Image:"C:\WinPE_amd64\mount" /Driver:"C:\SampleDriver\driver.inf"`
-
-### Files
-- Add to C:\WinPE_amd64\mount folder. 
-  - These files will show up in the X:
-- C:\WinPE_amd64\mount\Windows\System32\Startnet.cmd
-  - `%SYSTEMROOT%\System32\Startnet.cmd`
-- `Wpeinit -unattend:"C:\Unattend.xml"`
-### Enabled components
-- WinPE-HTA
-- WinPE-WMI
-- WinPE-NetFX
-- WinPE-Scripting
-- WinPE-SecureStartup
-- WinPE-PlatformID
-- WinPE-PowerShell
-- WinPE-DismCmdlets
-- WinPE-SecureBootCmdlets
-- WinPE-StorageWMI
-### Optional Components
-
-- WinPE-DismCmdlets
-- WinPE-Dot3Svc
-- WinPE-EnhancedStorage
-- WinPE-FMAPI
-- WinPE-Fonts-Legacy
-- WinPE-Font Support-JA-JP
-- WinPE-Font Support-KO-KR
-- WinPE-Font Support-ZH-CN
-- WinPE-Font Support-ZH-HK
-- WinPE-GamingPeripherals
-- Winpe-LegacySetup
-- WinPE-MDAC
-- WinPE-PlatformID
-- WinPE-PPPoE
-- WinPE-Rejuv
-- WinPE-RNDIS
-- WinPE-Setup
-- WinPE-Setup-Client
-- WinPE-Setup-Server
-- WinPE-SRT
-- WinPE-WDS-Tools
-- WinPE-WiFi-Package
-- WinPE-WinReCfg
-## Documentation
-
-[WinPE Optional Components](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-add-packages--optional-components-reference?view=windows-11)
 
