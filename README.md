@@ -1,18 +1,23 @@
 # Windows_PE
-[![Create WinPE_amd64.iso](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml/badge.svg)](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml)
+[![Create WinPE_amd64.iso](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml/badge.svg)](https://github.com/Kipjr/Windows_PE/actions/workflows/main.yml) 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=C7HN4VAGBTQFS&currency_code=EUR)
+<a href="https://www.buymeacoffee.com/kipjr" target="_blank"><img src="https://user-images.githubusercontent.com/12066560/94989781-8bd26280-0577-11eb-9482-26faff60e95d.png" alt="Buy Me A Coffee" style="height: 20px !important;width: 72px !important;" ></a>
+
 
 Automatic build &amp; customization of WinPE
 
 
 - [Windows_PE](#windows_pe)
-  * [Basic](#basic)
-  * [Customization](#customization)
-    + [Drivers](#drivers)
-    + [Files](#files)
-    + [Enabled components](#enabled-components)
-    + [Inactive Components](#inactive-components)
-  * [Documentation](#documentation)
-    + [Full Windows UEFI Boot schematic of Windows PE](#full-windows-uefi-boot-schematic-of-windows-pe)
+  - [Basic](#basic)
+  - [Customization](#customization)
+    - [Basic commands](#basic-commands)
+    - [Drivers](#drivers)
+    - [Applications](#applications)
+    - [Files](#files)
+    - [Enabled components](#enabled-components)
+      - [Inactive Components](#inactive-components)
+  - [Documentation](#documentation)
+  - [Full Windows UEFI Boot schematic of Windows PE](#full-windows-uefi-boot-schematic-of-windows-pe)
 
 ## Basic
 

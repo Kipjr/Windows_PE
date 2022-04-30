@@ -89,7 +89,6 @@ steps:
 
   - task: PowerShell@2
     displayName: Build the WinPE image (without MDT)
-
     condition: eq(${{ parameters.mdt }}, False)
     inputs:
       pwsh: true
