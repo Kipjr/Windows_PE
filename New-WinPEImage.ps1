@@ -1,5 +1,5 @@
-Param(
-    [ValidateSet("all", "none", "hp","dell","lenovo","vmware")]$branding="all",    
+﻿Param(
+    [ValidateSet("all", "none", "hp","dell","lenovo","vmware")]$branding="all",
     [boolean]$mdt=$false,
     [ValidateSet("amd64", "x86", "arm","arm64")]$arch="amd64",
     [string]$workingDirectory=$env:GITHUB_WORKSPACE
@@ -16,16 +16,18 @@ $old_loc=$PWD
 
 if($arch -eq "amd64"){$arch_short="x64"} else {$arch_short=$arch} #amd64 to x64
 set-variable -name adkPATH      -value  "C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit" -verbose
-set-variable -name WinPEPATH    -value  "$adkPATH\Windows Preinstallation Environment" -verbose 
+set-variable -name WinPEPATH    -value  "$adkPATH\Windows Preinstallation Environment" -verbose
 set-variable -name DeployImagingToolsENV -value "$adkPATH\Deployment Tools\DandISetEnv.bat" -verbose  #Deployment and Imaging Tools Environment
-set-variable -name WinPE_root   -value  "$workingDirectory\WinPE_$arch\mount" -verbose 
+set-variable -name WinPE_root   -value  "$workingDirectory\WinPE_$arch\mount" -verbose
 set-variable -name ISO_root     -value  "$workingDirectory\WinPE_$arch\media" -verbose
+$orisize = $null
+$endsize = $null
 
-if(!(test-path -path $workingDirectory)){new-item -itemtype directory -path $workingDirectory}   
+if(!(test-path -path $workingDirectory)){new-item -itemtype directory -path $workingDirectory}
 if(!(test-path -path .\source\_iso)){ New-Item -ItemType Directory -Path .\source -Name _iso -force -verbose } #create _iso in .\source (else error in "Adding Contents of source\_iso to ISO")
 if(!(test-path -path $workingDirectory\source)){copy-item -Path .\source -destination $workingDirectory -recurse}
 set-location $workingDirectory
-New-Item -ItemType Directory -Path $workingDirectory -Name temp -force -verbose #folder for temporary files                                                                                   
+New-Item -ItemType Directory -Path $workingDirectory -Name temp -force -verbose #folder for temporary files
 New-Item -ItemType Directory -Path $workingDirectory -Name source\Drivers\$branding -force  -verbose #folder for drivers of $Brand
 
 function New-WinPE() {
@@ -48,7 +50,7 @@ outputfolder will contain:
     }
     remove-item -path "$workingDirectory\WinPE_$arch\fwfiles\efisys.bin" #fix press key to boot from dvd
     copy-item -path "$adkPATH\Deployment Tools\amd64\Oscdimg\efisys_noprompt.bin" -Destination "$workingDirectory\WinPE_$arch\fwfiles\efisys.bin"
-    $global:orisize=get-item -path "$ISO_root\sources\boot.wim" | Select-Object -ExpandProperty length
+    $orisize=get-item -path "$ISO_root\sources\boot.wim" | Select-Object -ExpandProperty length
 }
 
 function New-FolderStructure() {
@@ -59,10 +61,10 @@ generate folderstructure
 .NOTES
     Boot
 
-    Deploy\Boot\{boot.wim -> LiteTouchPE_x64.wim} 
+    Deploy\Boot\{boot.wim -> LiteTouchPE_x64.wim}
     EFI
     bootmgr
-    bootmgr.efi    
+    bootmgr.efi
 #>
 
     get-childitem -Path $ISO_root\* -exclude @("bootmgr","bootmgr.efi","sources","Boot","EFI") -Depth 0 | remove-item -recurse #cleanup
@@ -70,7 +72,7 @@ generate folderstructure
         New-Item -ItemType Directory -path  "$ISO_root\Deploy" -name "$f"
     } #generate folderstructure
     move-item -path "$ISO_root\sources\boot.wim" "$ISO_root\Deploy\Boot\"
-    remove-item -path "$ISO_root\sources" -force 
+    remove-item -path "$ISO_root\sources" -force
 }
 
 function Mount-WinPE() {
@@ -89,7 +91,7 @@ General notes
 
 }
 
- Function Add-OptionalComponents() {
+ Function Add-OptionalComponent() {
 <#
 .SYNOPSIS
 Add WinPE Optional Components
@@ -155,9 +157,9 @@ only from .\source\_winpe where name does not contain .ignore
 
 #custom files:
     "Adding Files & Folders to WinPE" | write-host -ForegroundColor magenta
-    $folders = get-childitem -directory -Path ".\source\_winpe" -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}  | select -ExpandProperty fullname
-    $files = get-childitem -file -Path ".\source\_winpe" -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}  | select -ExpandProperty fullname
-    
+    $folders = get-childitem -directory -Path ".\source\_winpe" -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}  | select-object -ExpandProperty fullname
+    $files = get-childitem -file -Path ".\source\_winpe" -Recurse |  Where-Object {$_.FullName -notlike "*.ignore*"}  | select-object -ExpandProperty fullname
+
     foreach($fo in $folders) {
         $shortpath = $fo.Substring("$workingdirectory\source\_winpe".length + 1,$fo.length-"$workingdirectory\source\_winpe".length - 1) #get relative path
         if(!(test-path -path "$WinPE_root\$shortpath")){
@@ -178,23 +180,21 @@ function Add-AppsToWinPE(){
 .NOTES
 General notes
 #>
-    
 	#DeploymentMonitoringTool.exe (no download, direct included)
 	#CMTrace.exe (no download, direct included)
-	
 	#process explorer
+
     invoke-restmethod -OutFile ".\temp\ProcessExplorer.zip" -uri "https://download.sysinternals.com/files/ProcessExplorer.zip"
     7z t ".\temp\ProcessExplorer.zip"
     if($LASTEXITCODE -eq 0){
         7z x -y ".\temp\ProcessExplorer.zip" -o".\temp" 
         copy-item -path ".\temp\procexp64.exe" -Destination "$WinPE_root\windows\system32\" -verbose
     }
-	
     #7zip
     invoke-restmethod -OutFile ".\temp\7z2107-x64.exe" -uri "https://www.7-zip.org/a/7z2107-x64.exe"
     7z t ".\temp\7z2107-x64.exe"
     if($LASTEXITCODE -eq 0){
-        7z x -y ".\temp\7z2107-x64.exe" -o"$WinPE_root\Program Files\7-Zip" 
+        7z x -y ".\temp\7z2107-x64.exe" -o"$WinPE_root\Program Files\7-Zip"
     }
     # Powershell 7.2.2
     invoke-restmethod -OutFile ".\temp\pwsh.ps1"  -Uri 'https://aka.ms/install-powershell.ps1'
@@ -204,7 +204,7 @@ General notes
     invoke-restmethod -OutFile ".\temp\npp.8.3.3.portable.x64.zip" -uri "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v8.3.3/npp.8.3.3.portable.x64.zip"
     7z t ".\temp\npp.8.3.3.portable.x64.zip"
     if($LASTEXITCODE -eq 0){
-        7z x -y ".\temp\npp.8.3.3.portable.x64.zip" -o"$WinPE_root\Program Files\Notepad++" 
+        7z x -y ".\temp\npp.8.3.3.portable.x64.zip" -o"$WinPE_root\Program Files\Notepad++"
     }
     #launchbar
     Invoke-RestMethod -OutFile ".\temp\LaunchBar_x64.exe" -Uri "https://www.lerup.com/php/download.php?LaunchBar/LaunchBar_x64.exe"
@@ -214,8 +214,8 @@ General notes
     Invoke-RestMethod -OutFile ".\temp\doublecmd-1.0.5.x86_64-win64.zip" -uri "https://deac-fra.dl.sourceforge.net/project/doublecmd/DC for Windows 64 bit/Double Commander 1.0.5 beta/doublecmd-1.0.5.x86_64-win64.zip"
     7z t ".\temp\doublecmd-1.0.5.x86_64-win64.zip"
     if($LASTEXITCODE -eq 0){
-        7z x -y ".\temp\doublecmd-1.0.5.x86_64-win64.zip" -o"$WinPE_root\Program Files" 
-    }    
+        7z x -y ".\temp\doublecmd-1.0.5.x86_64-win64.zip" -o"$WinPE_root\Program Files"
+    }
     #utils
     $json=@"
 {
@@ -258,7 +258,7 @@ General notes
 
 }
 
-function Add-BootDrivers(){
+function Add-BootDriver(){
 <#
 .SYNOPSIS
 Add Boot-critical Drivers from HP,Dell or Lenovo
@@ -274,7 +274,7 @@ Net, Disk, Chipset (Thunderbolt)
     } else {
         $json.bootdrivers.$branding
     }
-    "Adding drivers" | write-host -ForegroundColor magenta    
+    "Adding drivers" | write-host -ForegroundColor magenta
     foreach($b in $arr){
         "$b" | write-host -ForegroundColor cyan
 
@@ -292,7 +292,7 @@ Net, Disk, Chipset (Thunderbolt)
             #Expand-Archive -Path  -DestinationPath .\source\Drivers\$foldername
             7z t ".\temp\$filename"
             if($LASTEXITCODE -eq 0){
-                7z x -y ".\temp\$filename" -o".\source\Drivers\$branding\$foldername" 
+                7z x -y ".\temp\$filename" -o".\source\Drivers\$branding\$foldername"
             } else {
                 "unable to extract $b " | write-host -ForegroundColor cyan
                 continue
@@ -306,21 +306,20 @@ Net, Disk, Chipset (Thunderbolt)
 
     "Injecting drivers from .\source\Drivers" | write-host -ForegroundColor cyan
     Add-WindowsDriver -Path "$WinPE_root" -Driver ".\source\Drivers\$branding" -verbose -Recurse
-    
 }
 
 
-function Add-Updates(){
+function Add-Update(){
     <#
     .SYNOPSIS
     Add updates
-    
+
     .NOTES
     
     #>
     Write-Host "Injecting updates from .\source\Updates"
-    Get-ChildItem ".\source\Updates" | ForEach-Object { 
-        Add-WindowsPackage -Path $WinPE_root -PackagePath ".\source\Updates\$_" 
+    Get-ChildItem ".\source\Updates" | ForEach-Object {
+        Add-WindowsPackage -Path $WinPE_root -PackagePath ".\source\Updates\$_"
     }
 }
 
@@ -332,10 +331,9 @@ Clean stuff
 .NOTES
 General notes
 #>
-
 }
 
-Function get-HashOfContents() {
+Function get-HashOfContent() {
 <#
 .SYNOPSIS
 Create hash of filecontens of boot.wim
@@ -345,7 +343,7 @@ General notes
 #>
 
     "Generating hash of contents boot.wim " | write-host -foregroundcolor magenta #issue with access denied
-    get-childitem "$WinPE_root" -Recurse -File | select @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist_boot.wim.csv -Delimiter ";"
+    get-childitem "$WinPE_root" -Recurse -File | select-object @{n="File";e={$_.Fullname| Resolve-Path -Relative }}, @{n="SHA256_filehash";e={ ($_.fullname | Get-FileHash -Algorithm SHA256).hash }} | Export-Csv -Path .\filelist_boot.wim.csv -Delimiter ";"
 }
 
 
@@ -363,7 +361,7 @@ General notes
     $endsize=get-item -path "$ISO_root\Deploy\Boot\boot.wim" | Select-Object -ExpandProperty length
     #Export-WindowsImage -SourceImagePath "$ISO_root\Deploy\Boot\boot.wim"  -DestinationImagePath "$ISO_root\Deploy\Boot\boot.wim"  -SourceIndex 1 -Setbootable -compressionType max
     #$optsize=get-item -path "$ISO_root\Deploy\Boot\boot.wim" | Select-Object -ExpandProperty length
-    "Size increase after modifying: $([float]($endsize / $global:orisize)) - $global:orisize-->$endsize" | write-host -foregroundcolor magenta
+    "Size increase after modifying: $([float]($endsize / $orisize)) - $orisize-->$endsize" | write-host -foregroundcolor magenta
     #"Size reduction after optimizing $([float]($optsize / $endsize)) - $endsize-->$optsize" | write-host -foregroundcolor magenta
 }
 
@@ -393,7 +391,7 @@ General notes
     $filePath = $wimpath.substring($ISO_root.length, ($wimpath.length - $ISO_root.length) ) #get relative path
     "filepath: $filePath" | write-host -ForegroundColor Cyan
     #bcdedit [/store <filename>] /set [{<id>}] <datatype> <value>
-    
+
     $bcdPath1 = "$ISO_root\Boot\BCD" #Legacy
     #$bcdstring1 = $(Get-BcdEntry -Store $bcdPath1  -id default).elements.where({$_.name -eq "device"}).value  #win11 only module
     $enumcommand1 = "bcdedit /store $bcdPath1"
@@ -433,11 +431,11 @@ Mount-WinPE
 #Add-DefaultStartCommands
 Add-FilesToWinPE
 Add-AppsToWinPE
-Add-OptionalComponents
-Add-BootDrivers
-#Add-Updates
+Add-OptionalComponent
+Add-BootDriver
+#Add-Update
 #Invoke-WinPEcleanup
-#Get-HashOfContents
+#Get-HashOfContent
 Dismount-Image
 Add-FilesToIso
 Set-BCDData
